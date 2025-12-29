@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Magang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Saya</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History Magang</a>
+                <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold mb-2">History Magang Mahasiswa </h2>
+            <p class="text-gray-600">Data Riwayat Tempat Magang Alumni dan Kakak Tingkat</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="text-center">
+                    <p class="text-4xl font-bold text-blue-600" id="stat-total">0</p>
+                    <p class="text-gray-600 mt-2">Total Mahasiswa yang Pernah Magang</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="text-center">
+                    <p class="text-4xl font-bold text-green-600" id="stat-companies">0</p>
+                    <p class="text-gray-600 mt-2">Jumlah Perusahaan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Jurusan</label>
+                    <select id="filter-jurusan" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Semua Jurusan</option>
+                        <option value="my-jurusan">Jurusan Saya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cari Perusahaan/Posisi</label>
+                    <input type="text" id="search-input" placeholder="Ketik untuk mencari..." class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-blue-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Urutkan</label>
+                    <select id="sort-by" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="newest">Terbaru</option>
+                        <option value="oldest">Terlama</option>
+                        <option value="company">Nama Perusahaan A-Z</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Menampilkan <span id="count-display" class="font-semibold">0</span> history
+                </div>
+                <button id="reset-filter" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm">
+                    Reset Filter
+                </button>
+            </div>
+        </div>
+
+        <div id="history-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Card akan insert disini -->
+        </div>
+
+        <div id="empty-state" class="hidden bg-white rounded-lg shadow p-12 text-center">
+            <div class="text-gray-400 text-6xl mb-4">📚</div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum ada History</h3>
+            <p class="text-gray-500">Belum ada data history magang yang tersedia</p>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Detail History Magang</h3>
+                <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="detail-content" class="space-y-6"></div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('MAHASISWA');
+        const mahasiswa = user.mahasiswa;
+        let allHistory = [];
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch(`${API_URL}/mahasiswa/history`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                allHistory = data;
+                
+                populateJurusanFilter(data);
+                calculateStatistics(data);
+                displayHistory(data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat data history');
+            }
+        }
+
+        function populateJurusanFilter(history) {
+            const jurusanSet = new Set();
+            history.forEach(item => {
+                if (item.jurusanMahasiswa) {
+                    jurusanSet.add(item.jurusanMahasiswa);
+                }
+            });
+
+            const select = document.getElementById('filter-jurusan');
+            const currentValue = select.value;
+
+            select.innerHTML = `
+                <option value="">Semua Jurusan</option>
+                <option value="my-jurusan">Jurusan Saya (${mahasiswa.jurusan})</option>
+            `;
+
+            Array.from(jurusanSet).sort().forEach(jurusan => {
+                if (jurusan !== mahasiswa.jurusan) {
+                    const option = document.createElement('option');
+                    option.value = jurusan;
+                    option.textContent = jurusan;
+                    select.appendChild(option);
+                }
+            });
+
+            select.value = currentValue;
+        }
+
+        function calculateStatistics(history) {
+            const uniqueMahasiswa = new Set(history.map(h => h.nimMahasiswa));
+            document.getElementById('stat-total').textContent = uniqueMahasiswa.size;
+
+            const uniqueCompanies = new Set(history.map(h => h.namaPerusahaan));
+            document.getElementById('stat-companies').textContent = uniqueCompanies.size;
+        }
+
+        function filterAndSortHistory() {
+            let filtered = [...allHistory];
+
+            const jurusanFilter = document.getElementById('filter-jurusan').value;
+            if (jurusanFilter === 'my-jurusan') {
+                filtered = filtered.filter(h => h.jurusanMahasiswa === mahasiswa.jurusan);
+            } else if (jurusanFilter) {
+                filtered = filtered.filter(h => h.jurusanMahasiswa === jurusanFilter);
+            }
+
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(h => 
+                    (h.namaPerusahaan && h.namaPerusahaan.toLowerCase().includes(searchTerm)) ||
+                    (h.posisiMagang && h.posisiMagang.toLowerCase().includes(searchTerm)) ||
+                    (h.namaMahasiswa && h.namaMahasiswa.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            const sortBy = document.getElementById('sort-by').value;
+            switch(sortBy) {
+                case 'newest':
+                    filtered.sort((a, b) => new Date(b.tanggalSelesai) - new Date(a.tanggalSelesai));
+                    break;
+                case 'oldest':
+                    filtered.sort((a, b) => new Date(a.tanggalSelesai) - new Date(b.tanggalSelesai));
+                    break;
+                case 'company':
+                    filtered.sort((a, b) => (a.namaPerusahaan || '').localeCompare(b.namaPerusahaan || ''));
+                    break;
+            }
+
+            displayHistory(filtered);
+        }
+
+        function displayHistory(history) {
+            const container = document.getElementById('history-container');
+            const emptyState = document.getElementById('empty-state');
+
+            document.getElementById('count-display').textContent = history.length;
+
+            if (history.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            container.innerHTML = history.map(item => {
+                const isMyJurusan = item.jurusanMahasiswa === mahasiswa.jurusan;
+                const duration = Math.ceil((new Date(item.tanggalSelesai) - new Date(item.tanggalMulai)) / (1000 * 60 * 60 * 24 * 30));
+
+                return `
+                    <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" onclick="viewHistory('${item.id}')">
+                        <div class="p-6">
+                            <!-- Header -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1">${item.namaPerusahaan}</h3>
+                                    <p class="text-sm text-gray-600">${item.posisiMagang}</p>
+                                </div>
+                                ${item.nilaiAkhir ? `
+                                    <div class="ml-2">
+                                        <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-semibold">
+                                            ${item.nilaiAkhir}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- Mahasiswa Info -->
+                            <div class="mb-4 p-3 bg-gray-50 rounded">
+                                <p class="text-sm font-semibold text-gray-700">${item.namaMahasiswa}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs text-gray-500">${item.nimMahasiswa}</span>
+                                    <span class="text-xs px-2 py-0.5 ${isMyJurusan ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} rounded">
+                                        ${item.jurusanMahasiswa}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Period & Duration -->
+                            <div class="mb-4">
+                                <div class="flex items-center text-sm text-gray-600 mb-1">
+                                    <span class="mr-2">📅</span>
+                                    <span>${new Date(item.tanggalMulai).toLocaleDateString('id-ID', {month: 'short', year: 'numeric'})} - ${new Date(item.tanggalSelesai).toLocaleDateString('id-ID', {month: 'short', year: 'numeric'})}</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <span class="mr-2">⏱️</span>
+                                    <span>Durasi: ${duration} bulan</span>
+                                </div>
+                            </div>
+
+                            <!-- Website -->
+                            ${item.websitePerusahaan ? `
+                                <a href="${item.websitePerusahaan}" target="_blank" 
+                                   onclick="event.stopPropagation()"
+                                   class="inline-flex items-center text-sm text-blue-600 hover:underline">
+                                    🔗 Website Perusahaan
+                                </a>
+                            ` : ''}
+
+                            <!-- Badge jika jurusan sama -->
+                            ${isMyJurusan ? `
+                                <div class="mt-3 pt-3 border-t">
+                                    <span class="inline-flex items-center text-xs text-green-600 font-medium">
+                                        ✨ Dari jurusan yang sama dengan kamu
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function viewHistory(id) {
+            document.getElementById('detail-modal').classList.remove('hidden');
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Memuat data...</p>
+                </div>
+            `;
+
+            try {
+                const item = allHistory.find(h => h.id === id);
+                if (!item) throw new Error('Data tidak ditemukan');
+
+                displayDetail(item);
+            } catch (error) {
+                document.getElementById('detail-content').innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                        <p class="text-red-600">Gagal memuat detail</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDetail(data) {
+            const duration = Math.ceil((new Date(data.tanggalSelesai) - new Date(data.tanggalMulai)) / (1000 * 60 * 60 * 24 * 30));
+            const isMyJurusan = data.jurusanMahasiswa === mahasiswa.jurusan;
+
+            document.getElementById('detail-content').innerHTML = `
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
+                    <h4 class="text-2xl font-bold mb-2">${data.namaMahasiswa}</h4>
+                    <p class="opacity-90">${data.nimMahasiswa} - ${data.jurusanMahasiswa}</p>
+                    ${isMyJurusan ? '<p class="mt-2 text-sm">✨ Dari jurusan yang sama dengan kamu!</p>' : ''}
+                </div>
+
+                <!-- Info Perusahaan -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">🏢</span>
+                        Informasi Perusahaan & Posisi
+                    </h5>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-500">Nama Perusahaan</label>
+                            <p class="font-medium text-lg">${data.namaPerusahaan || '-'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Posisi Magang</label>
+                            <p class="font-medium">${data.posisiMagang || '-'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Website Perusahaan</label>
+                            <p class="font-medium">
+                                ${data.websitePerusahaan ? `<a href="${data.websitePerusahaan}" target="_blank" class="text-blue-600 hover:underline">🔗 ${data.websitePerusahaan}</a>` : '-'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Periode & Nilai -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📅</span>
+                        Periode & Penilaian
+                    </h5>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-500">Tanggal Mulai</label>
+                            <p class="font-medium">${new Date(data.tanggalMulai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Tanggal Selesai</label>
+                            <p class="font-medium">${new Date(data.tanggalSelesai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Durasi</label>
+                            <p class="font-medium">${duration} bulan</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Nilai Akhir</label>
+                            <p class="font-medium">
+                                ${data.nilaiAkhir ? `<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-lg">${data.nilaiAkhir}</span>` : '<span class="text-gray-400">Tidak ada nilai</span>'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan -->
+                ${data.catatan ? `
+                    <div class="border rounded-lg p-6">
+                        <h5 class="text-lg font-semibold mb-4 flex items-center">
+                            <span class="bg-yellow-100 text-yellow-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📝</span>
+                            Catatan
+                        </h5>
+                        <p class="text-gray-700 whitespace-pre-wrap">${data.catatan}</p>
+                    </div>
+                ` : ''}
+
+                <!-- Inspirasi Message -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm text-blue-700">
+                        💡 <strong>Tips:</strong> Gunakan informasi ini sebagai referensi untuk mengetahui perusahaan mana yang cocok dengan jurusan kamu dan persiapkan diri sebaik mungkin!
+                    </p>
+                </div>
+            `;
+        }
+
+        document.getElementById('close-detail-modal').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        document.getElementById('filter-jurusan').addEventListener('change', filterAndSortHistory);
+        document.getElementById('search-input').addEventListener('input', filterAndSortHistory);
+        document.getElementById('sort-by').addEventListener('change', filterAndSortHistory);
+        document.getElementById('reset-filter').addEventListener('click', () => {
+            document.getElementById('filter-jurusan').value = '';
+            document.getElementById('search-input').value = '';
+            document.getElementById('sort-by').value = 'newest';
+            filterAndSortHistory();
+        });
+
+        fetchHistory();
+    </script>
+</body>
+</html>

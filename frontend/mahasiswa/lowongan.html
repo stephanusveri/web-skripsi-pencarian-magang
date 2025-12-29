@@ -1,0 +1,324 @@
+<!-- lowongan.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cari Lowongan Magang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Cari Lowongan</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Saya</a>
+                <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History Magang</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2 font-bold">Lowongan Magang Tersedia</h2>
+            <div class="flex gap-4">
+                <input type="text" id="search" placeholder="Cari lowongan..." 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="filter-status" 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="BUKA">Buka</option>
+                    <option value="TUTUP">Tutup</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="lowongan-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- populated by JS -->
+        </div>
+    </div>
+
+    <!-- Modal Detail Lowongan -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="modal-content">
+                    <!-- Will be populated by JS -->
+                </div>
+
+                <!-- form lamaran -->
+                <div class="border-t pt-6">
+                    <h4 class="text-xl font-semibold mb-4">Kirim Lamaran</h4>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Upload CV dan Tambahkan link portfolio/profil profesional Anda
+                    </p>
+
+                    <form id="apply-form">
+                        <input type="hidden" id="lowongan-id">
+
+                        <!-- upload cv -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">
+                                CV (PDF) *
+                            </label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                                <input type="file" id="cv-file" accept=".pdf" required class="hidden" onchange="handleFileSelect(this)">
+                                <label for="cv-file" class="cursor-pointer">
+                                    <div id="cv-upload-area">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-600">
+                                            <span class="text-blue-600 font-medium">Klik untuk upload</span>
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-1">PDF maksimal 5mb</p>
+                                    </div>
+                                    <div id="cv-file-info" class="hidden">
+                                        <div class="flex items-center justify-center gap-2 text-green-600">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span id="cv-file-name" class="font-medium"></span>
+                                        </div>
+                                        <button type="button" onclick="clearFile()" class="text-xs text-red-600 hover:underline mt-2">
+                                            Hapus file
+                                        </button>
+                                    </div>
+                                </label>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                💡 Tips: Gunakan Google Drive, Dropbox, atau OneDrive untuk upload CV, lalu paste link-nya
+                            </p>
+                        </div>
+
+                        <!-- link cv -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">
+                                Atau Link CV *
+                            </label>
+                            <input type="url" id="cv-link" placeholder="https://drive.google.com/file/d/..." 
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Upload CV ke cloud storage dan pastikan akses dibuat "Anyone with link can view"
+                            </p>
+                        </div>
+
+                        <div class="border-t border-b py-3 mb-4">
+                            <p class="text-sm font-medium text-gray-700">
+                                Salah satu dari CV file atau CV link harus diisi
+                            </p>
+                        </div>
+
+                        <!-- portfolio -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">
+                                Link Portfolio <span class="text-gray-500 text-sm font-normal">Opsional</span>
+                            </label>
+                            <input type="url" id="portfolio-link" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Website portfolio, Github, Behance, atau platform lainnya
+                            </p>
+                        </div>
+
+                        <!-- linkedin -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">
+                                Link Linkedin <span class="text-gray-500 text-sm font-normal">(Opsional)</span>
+                            </label>
+                            <input type="url" id="linkedin-link" placeholder="https://linkedin.com/in/username" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- resume/additional link -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">
+                                Link Resume/Dokumen Tambahan <span class="text-gray-500 text-sm font-normal">(Opsional)</span>
+                            </label>
+                            <input type="url" id="resume-link" placeholder="https://..." class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Sertifikat, transkrip, atau dokumen pendukung lainnya
+                            </p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium">
+                            Kirim Lamaran
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        // Initialize
+        const user = initCommon('MAHASISWA');
+        let allLowongan = [];
+        let selectedFile = null;
+
+        // handle file selection
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                // validasi tipe file
+                if (file.type !== 'application/pdf') {
+                    alert('Hanya file PDF yang diperbolehakan!');
+                    input.value = '';
+                    return;
+                }
+
+                // validasi size file (max 5mb)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 5MB!');
+                    input.value = '';
+                    return;
+                }
+
+                selectedFile = file;
+                document.getElementById('cv-upload-area').classList.add('hidden');
+                document.getElementById('cv-file-info').classList.remove('hidden');
+                document.getElementById('cv-file-name').textContent = file.name;
+
+                document.getElementById('cv-link').value = '';
+            }
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('cv-file').value = '';
+            document.getElementById('cv-upload-area').classList.remove('hidden');
+            document.getElementById('cv-file-info').classList.add('hidden');
+        }
+        
+        // Fetch lowongan
+        async function fetchLowongan() {
+            showLoading('lowongan-list');
+            try {
+                const response = await fetch (`${API_URL}/lowongan`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                allLowongan = data;
+                displayLowongan(data);
+            } catch (error) {
+                showError('lowongan-list', 'Gagal memuat lowongan');
+            }
+        }
+
+        function displayLowongan(lowongan) {
+            const container = document.getElementById('lowongan-list');
+            
+            if (lowongan.length === 0) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500">Tidak ada lowongan</p>';
+                return;
+            }
+
+            container.innerHTML = lowongan.map(item => `
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition cursor-pointer"
+                    onclick="showDetail('${item.id}')">
+                    <h3 class="font-bold text-lg mb-2">${item.judul}</h3>
+                    <p class="text-gray-600 text-sm mb-2">${item.perusahaan.namaPerusahaan}</p>
+                    <p class="text-gray-700 text-sm mb-3">${item.deskripsi.substring(0, 100)}...</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">📍 ${item.lokasi}</span>
+                        <span class="px-3 py-1 rounded ${getStatusClass(item.status)}">
+                            ${item.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function showDetail(id) {
+            try {
+                const lowongan = await apiGet(`/lowongan/${id}`);
+                
+                document.getElementById('lowongan-id').value = id;
+                document.getElementById('modal-title').textContent = lowongan.judul;
+                document.getElementById('modal-content').innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold">Perusahaan</h4>
+                            <p>${lowongan.perusahaan.namaPerusahaan}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Deskripsi</h4>
+                            <p>${lowongan.deskripsi}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Persyaratan</h4>
+                            <p class="whitespace-pre-wrap">${lowongan.persyaratan}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><strong>Lokasi:</strong> ${lowongan.lokasi}</div>
+                            <div><strong>Durasi:</strong> ${lowongan.durasi}</div>
+                            <div><strong>Kuota:</strong> ${lowongan.kuota} orang</div>
+                            <div><strong>Status:</strong> ${lowongan.status}</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('detail-modal').classList.remove('hidden');
+            } catch (error) {
+                showToast('Gagal memuat detail lowongan', 'error');
+            }
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        document.getElementById('apply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                lowonganId: document.getElementById('lowongan-id').value,
+                suratLamaran: document.getElementById('surat-lamaran').value,
+                catatan: document.getElementById('catatan').value
+            };
+            
+            try {
+                await apiPost('/mahasiswa/lamaran', data);
+                showToast('Lamaran berhasil dikirim!', 'success');
+                document.getElementById('detail-modal').classList.add('hidden');
+                document.getElementById('apply-form').reset();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+
+        // Search & Filter
+        document.getElementById('search').addEventListener('input', filterLowongan);
+        document.getElementById('filter-status').addEventListener('change', filterLowongan);
+
+        function filterLowongan() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+            
+            const filtered = allLowongan.filter(item => {
+                const matchSearch = item.judul.toLowerCase().includes(search) || 
+                                   item.perusahaan.namaPerusahaan.toLowerCase().includes(search);
+                const matchStatus = !status || item.status === status;
+                return matchSearch && matchStatus;
+            });
+            
+            displayLowongan(filtered);
+        }
+
+        // Init
+        fetchLowongan();
+    </script>
+</body>
+</html>

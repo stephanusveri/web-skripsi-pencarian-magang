@@ -1,0 +1,142 @@
+<!-- admin/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Admin</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
+                <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Dashboard Admin</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Total Perusahaan</h3>
+                <p id="total-perusahaan" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Total Mahasiswa</h3>
+                <p id="total-mahasiswa" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Total Lowongan</h3>
+                <p id="total-lowongan" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Total Lamaran</h3>
+                <p id="total-lamaran" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+        </div>
+
+        <!-- Chart & Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Lowongan Terbaru</h3>
+                <div id="recent-lowongan"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-bold mb-4">Lamaran Terbaru</h3>
+                <div id="recent-lamaran"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('ADMIN');
+
+        async function fetchDashboardData() {
+            try {
+                showLoading('recent-lowongan');
+                showLoading('recent-lamaran');
+
+                const [perusahaanRes, mahasiswaRes, lowonganRes, lamaranRes] = await Promise.all([
+                    fetch (`${API_URL}/admin/perusahaan`, {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    }),
+                    fetch(`${API_URL}/admin/mahasiswa`, {
+                        headers: { 'Authorization' : `Bearer ${getToken()}` }
+                    }),
+                    fetch(`${API_URL}/lowongan`),
+                    fetch(`${API_URL}/admin/lamaran`, {
+                        headers: { 'Authorization' : `Bearer ${getToken()}` }
+                    })
+                ]);
+
+                const perusahaan = await perusahaanRes.json();
+                const mahasiswa = await mahasiswaRes.json();
+                const lowongan = await lowonganRes.json();
+                const lamaran = await lamaranRes.json();
+
+                document.getElementById('total-perusahaan').textContent =  perusahaan.length;
+                document.getElementById('total-mahasiswa').textContent = mahasiswa.length;
+                document.getElementById('total-lowongan').textContent = lowongan.length;
+                document.getElementById('total-lamaran').textContent = lamaran.length;
+
+                displayRecentLowongan(lowongan.slice(0, 5));
+                displayRecentLamaran(lamaran.slice(0, 5));
+            } catch (error) {
+                console.error('Error:', error);
+                showError('recent-lowongan', 'Gagal memuat data');
+                showError('recent-lamaran', 'Gagal memuat data');
+            }
+        }
+
+        function displayRecentLowongan(lowongan) {
+            const container = document.getElementById('recent-lowongan');
+            if (lowongan.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Belum ada lowongan</p>';
+                return;
+            }
+
+            container.innerHTML = lowongan.map(item => `
+                <div class="border-b pb-3 mb-3 last:border-0">
+                    <h4 class="font-semibold">${item.judul}</h4>
+                    <p class="text-sm text-gray-600"> ${item.perusahaan.namaPerusahaan}</p>
+                    <p class="text-sm text-gray-500"> ${item.lokasi} • ${item._count?.lamaran || 0} pelamar</p>
+                </div>
+            `).join('');
+        }
+
+        function displayRecentLamaran(lamaran) {
+            const container = document.getElementById('recent-lamaran');
+            if (lamaran.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Belum ada lamaran</p>';
+                return; 
+            }
+
+            container.innerHTML = lamaran.map(item =>`     
+                <div class="border-b pb-3 mb-3 last:border-0">
+                    <h4 class="font-semibold">${item.mahasiswa.nama}</h4>
+                    <p class="text-sm text-gray-600">${item.lowongan.judul}</p>
+                    <span class="text-xs px-2 py-1 rounded ${
+                        item.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                        item.status === 'DITERIMA' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                    }">
+                        ${item.status}
+                    </span>
+                </div>                                       
+                `).join('');
+        }
+
+        fetchDashboardData();
+    </script>
+</body>
+</html>

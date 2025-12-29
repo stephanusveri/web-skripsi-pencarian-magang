@@ -1,0 +1,136 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+enum UserRole {
+    ADMIN
+    MAHASISWA
+    PERUSAHAAN
+}
+
+enum StatusLowongan {
+    BUKA
+    TUTUP
+}
+
+enum StatusLamaran {
+    PENDING
+    DITERIMA
+    DITOLAK
+}
+
+model User {
+    id        String @id @default(uuid())
+    email     String @unique
+    password  String
+    role      UserRole
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    admin      Admin?
+    mahasiswa  Mahasiswa?
+    perusahaan Perusahaan?
+}
+
+model Admin {
+  id     String @id @default(uuid())
+  nama   String
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  perusahaanManaged Perusahaan[]
+  historyMagang     HistoryMagang[]
+}
+
+model Mahasiswa {
+  id            String   @id @default(uuid())
+  nim           String   @unique
+  nama          String
+  jurusan       String
+  semester      Int
+  foto          String?
+  cv            String?
+  transkrip     String?
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lamaran       Lamaran[]
+}
+
+model Perusahaan {
+  id              String   @id @default(uuid())
+  namaPerusahaan  String
+  alamat          String
+  telepon         String
+  email           String
+  website         String?
+  deskripsi       String?
+  logo            String?
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  adminId         String?
+  admin           Admin?   @relation(fields: [adminId], references: [id])
+
+  lowongan        LowonganMagang[]
+}
+
+model LowonganMagang {
+  id              String          @id @default(uuid())
+  judul           String
+  deskripsi       String
+  persyaratan     String
+  kuota           Int
+  durasi          String
+  lokasi          String
+  status          StatusLowongan  @default(BUKA)
+  tanggalMulai    DateTime
+  tanggalSelesai  DateTime
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  perusahaanId    String
+  perusahaan      Perusahaan      @relation(fields: [perusahaanId], references: [id], onDelete: Cascade)
+
+  lamaran         Lamaran[]
+}
+
+model Lamaran {
+  id              String         @id @default(uuid())
+  status          StatusLamaran  @default(PENDING)
+  suratLamaran    String
+  tanggalLamar    DateTime       @default(now())
+  catatan         String?
+
+  mahasiswaId     String
+  mahasiswa       Mahasiswa      @relation(fields: [mahasiswaId], references: [id], onDelete: Cascade)
+
+  lowonganId      String
+  lowongan        LowonganMagang @relation(fields: [lowonganId], references: [id], onDelete: Cascade)
+
+  @@unique([mahasiswaId, lowonganId])
+}
+
+model HistoryMagang {
+  id                String    @id @default(uuid())
+
+  namaMahasiswa     String
+  nimMahasiswa      String
+  jurusanMahasiswa  String
+  namaPerusahaan    String
+  posisiMagang      String
+  websitePerusahaan String? 
+  tanggalMulai      DateTime
+  tanggalSelesai    DateTime
+  nilaiAkhir        Float?
+  catatan           String?
+  createdAt         DateTime  @default(now())
+
+  adminId         String?
+  admin           Admin?    @relation(fields: [adminId], references: [id])
+}

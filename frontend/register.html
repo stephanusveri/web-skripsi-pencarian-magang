@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mahasiswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600">Cari Lowongan</a>
+                <a href="lamaran.html" class="text-blue-600">Lamaran Saya</a>
+                <a href="profile.html" class="text-blue-600">Profile</a>
+                <button id="logout-btn" class="text-red-600">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Selamat Datang, <span id="nama-mahasiswa">Loading...</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Total Lamaran</h3>
+                <p id="total-lamaran" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Diterima</h3>
+                <p id="total-diterima" class="text-3xl font-bold text-green-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-600 mb-2">Pending</h3>
+                <p id="total-pending" class="text-3xl font-bold text-yellow-600">0</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold mb-4">Lamaran Terbaru</h3>
+            <div id="recent-lamaran">
+                <p class="text-gray-500">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple inline script - no external dependencies
+        (function() {
+            const apiUrl = 'http://localhost:5000/api';
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            // Check auth
+            if (!token || !userStr) {
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            let user;
+            try {
+                user = JSON.parse(userStr);
+                if (user.role !== 'MAHASISWA') {
+                    alert('Akses ditolak');
+                    window.location.href = '../login.html';
+                    return;
+                }
+            } catch (error) {
+                console.error('Parse error:', error);
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            // Display nama
+            if (user && user.mahasiswa) {
+                document.getElementById('nama-mahasiswa').textContent = user.mahasiswa.nama;
+            }
+            
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.clear();
+                window.location.href = '../login.html';
+            });
+            
+            // Fetch data
+            fetch(apiUrl + '/mahasiswa/lamaran', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(response) {
+                if (!response.ok) throw new Error('Fetch failed');
+                return response.json();
+            })
+            .then(function(lamaran) {
+                // Update stats
+                document.getElementById('total-lamaran').textContent = lamaran.length;
+                document.getElementById('total-diterima').textContent = 
+                    lamaran.filter(function(l) { return l.status === 'DITERIMA'; }).length;
+                document.getElementById('total-pending').textContent = 
+                    lamaran.filter(function(l) { return l.status === 'PENDING'; }).length;
+                
+                // Display lamaran
+                var container = document.getElementById('recent-lamaran');
+                if (lamaran.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">Belum ada lamaran</p>';
+                } else {
+                    var html = '';
+                    lamaran.slice(0, 5).forEach(function(item) {
+                        var statusClass = item.status === 'DITERIMA' ? 'bg-green-100 text-green-700' :
+                                         item.status === 'DITOLAK' ? 'bg-red-100 text-red-700' :
+                                         'bg-yellow-100 text-yellow-700';
+                        
+                        html += '<div class="border-b pb-4 mb-4">' +
+                                '<div class="flex justify-between items-start">' +
+                                '<div>' +
+                                '<h4 class="font-semibold">' + item.lowongan.judul + '</h4>' +
+                                '<p class="text-gray-600">' + item.lowongan.perusahaan.namaPerusahaan + '</p>' +
+                                '<p class="text-sm text-gray-500">Tanggal: ' + 
+                                new Date(item.tanggalLamar).toLocaleDateString('id-ID') + '</p>' +
+                                '</div>' +
+                                '<span class="px-3 py-1 rounded text-sm ' + statusClass + '">' +
+                                item.status + '</span>' +
+                                '</div></div>';
+                    });
+                    container.innerHTML = html;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                document.getElementById('recent-lamaran').innerHTML = 
+                    '<p class="text-red-500">Gagal memuat data</p>';
+            });
+        })();
+    </script>
+</body>
+</html>

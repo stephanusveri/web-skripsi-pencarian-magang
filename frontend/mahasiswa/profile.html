@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Mahasiswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Cari Lowongan</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Saya</a>
+                <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History Magang</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Profile Saya</h2>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <form id="profile-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">NIM</label>
+                        <input type="text" id="nim"  readonly class="w-full px-4 py-2 border rounded bg-gray-100">
+                    </div>
+
+                    <div>
+                          <label class="block text-gray-700 mb-2">Nama Lengkap *</label>
+                        <input type="text" id="nama" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                          <label class="block text-gray-700 mb-2">Jurusan *</label>
+                        <input type="text" id="jurusan" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                          <label class="block text-gray-700 mb-2">Semester *</label>
+                        <input type="number" id="semester" min="1" max="14" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-gray-700 mb-2">Link CV</label>
+                    <input type="url" id="cv" placeholder="https://..."
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Upload CV ke Google Drive/Dropbox dan paste linknya</p>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-gray-700 mb-2">Link Transkrip</label>
+                    <input type="url" id="transkrip" placeholder="https://..."
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Upload transkrip ke Google Drive/Dropbox dan paste linknya</p>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-gray-700 mb-2">Link Foto</label>
+                    <input type="url" id="foto" placeholder="https://..."
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Upload foto ke Google Drive/Dropbox dan paste linknya</p>
+                </div>
+
+                <div class="mt-6 flex gap-4">
+                    <button type="submit" 
+                        class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Simpan Perubahan
+                    </button>
+                    <button type="button" onclick="loadProfile()"
+                        class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../js/common.js"></script>
+    <script>
+        // const user = initCommon('MAHASISWA');
+        // document.getElementById('logout-btn').addEventListener('click', logout);
+
+        // function loadProfile() {
+        //     const user = getUser();
+        //     const mahasiswa = user.mahasiswa;
+
+        //     document.getElementById('nim').value = mahasiswa.nim;
+        //     document.getElementById('nama').value = mahasiswa.nama;
+        //     document.getElementById('jurusan').value = mahasiswa.jurusan;
+        //     document.getElementById('semester').value = mahasiswa.semester;
+        //     document.getElementById('cv').value = mahasiswa.cv || '';
+        //     document.getElementById('transkrip').value = mahasiswa.transkrip || '';
+        //     document.getElementById('foto').value = mahasiswa.foto || '';
+        // }
+
+        // document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        //     e.preventDefault();
+
+        //     const data = {
+        //         nama: document.getElementById('nama').value,
+        //         jurusan: document.getElementById('jurusan').value,
+        //         semester: parseInt(document.getElementById('semester').value),
+        //         cv: document.getElementById('cv').value || null,
+        //         transkrip: document.getElementById('transkrip').value || null,
+        //         foto: document.getElementById('foto').value || null 
+        //     };
+
+        //     try {
+        //         const response = await fetch(`${API_URL}/mahasiswa/profile`, {
+        //             method: 'PUT',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'Authorization': `Bearer ${getToken()}`
+        //             },
+        //             body: JSON.stringify(data)
+        //         }); 
+
+        //         if (!response.ok) {
+        //             const error = await response.json();
+        //             throw new Error(error.message);
+        //         }
+
+        //         const updatedMahasiswa = await response.json();
+
+        //         // Update local storage
+        //         const user = getUser();
+        //         user.mahasiswa = updatedMahasiswa;
+        //         localStorage.setItem('user', JSON/stringify(user));
+
+        //         alert('Profile berhasil diupdate!');
+        //     } catch (error) {
+        //         alert('Error: ' + error.message);
+        //     }
+        // });
+
+        // loadProfile();
+        const user = initCommon('MAHASISWA');
+
+        function loadProfile() {
+            const mahasiswa = user.mahasiswa;
+
+            document.getElementById('nim').value = mahasiswa.nim || '';
+            document.getElementById('nama').value = mahasiswa.nama || '';
+            document.getElementById('jurusan').value = mahasiswa.jurusan || '';
+            document.getElementById('semester').value = mahasiswa.semester || '';
+            document.getElementById('cv').value = mahasiswa.cv || '';
+            document.getElementById('transkrip').value = mahasiswa.transkrip || '';
+            document.getElementById('foto').value = mahasiswa.foto || '';
+        }
+
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                nama: document.getElementById('nama').value,
+                jurusan: document.getElementById('jurusan').value,
+                semester: parseInt(document.getElementById('semester').value),
+                cv: document.getElementById('cv').value || null,
+                transkrip: document.getElementById('transkrip').value || null,
+                foto: document.getElementById('foto').value || null 
+            };
+
+            try {
+                const updatedMahasiswa = await apiPut('/mahasiswa/profile', data);
+
+                // Update local storage
+                user.mahasiswa = updatedMahasiswa;
+                localStorage.setItem('user', JSON.stringify(user));
+
+                showToast('Profile berhasil diupdate!', 'success');
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        });
+
+        loadProfile();
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pencarian Magang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">Sistem Magang</h1>
+            <div class="space-x-4">
+                <a href="#features" class="text-gray-700 hover:text-blue-600"></a>
+                <a href="#about" class="text-gray-700 hover:text-blue-600"></a>
+                <a href="login.html" class="px-4 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50">
+                    Login
+                </a>
+                <a href="register.html" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Daftar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="max-w-7xl mx-auto px-4 py-20 text-center">
+        <h1 class="text-5xl font-bold text-gray-800 mb-6">
+            Lowongan Magang
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Platform terpadu untuk menghubungkan mahasiswa dengan perusahaan 
+            untuk pengalaman magang yang bermakna
+        </p>
+        <div class="flex gap-4 justify-center">
+            <a href="register.html"  class="px-8 py-4 bg-blue-600 text-white rounded-lg text-lg font-semibold hover:bg-blue-700 transition">
+            Mulai Sekarang →</a>
+            <a href="#features" 
+                class="px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-50 transition border border-blue-600">
+                Pelajari Lebih Lanjut
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="bg-white py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Fitur Unggulan</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 border rounded-lg hover:shadow-lg transition">
+                    <div class="text-4xl mb-4">🎓</div>
+                    <h3 class="text-xl font-bold mb-2">Untuk Mahasiswa</h3>
+                    <p class="text-gray-600">
+                        Cari lowongan magang sesuai jurusan, apply dengan mudah, 
+                        dan track status lamaran secara real-time
+                    </p>
+                </div>
+
+                <div class="p-6 border rounded-lg hover:shadow-lg transition">
+                    <div class="text-4xl mb-4">🏢</div>
+                    <h3 class="text-xl font-bold mb-2">Untuk Perusahaan</h3>
+                    <p class="text-gray-600">
+                        Post lowongan magang, kelola aplikasi, dan temukan 
+                        kandidat terbaik untuk tim Anda
+                    </p>
+                </div>
+
+                <div class="p-6 border rounded-lg hover:shadow-lg transition">
+                    <div class="text-4xl mb-4">⚙️</div>
+                    <h3 class="text-xl font-bold mb-2">Untuk Admin</h3>
+                    <p class="text-gray-600">
+                        Kelola data perusahaan, mahasiswa, dan monitoring 
+                        seluruh aktivitas magang
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-20 bg-blue-600 text-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-bold mb-2">500+</div>
+                    <p class="text-blue-100">Lowongan Tersedia</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">1000+</div>
+                    <p class="text-blue-100">Mahasiswa Terdaftar</p>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold mb-2">200+</div>
+                    <p class="text-blue-100">Perusahaan Partner</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Tentang MagangKu</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                MagangKu adalah platform digital yang memfasilitasi proses pencarian 
+                dan pengelolaan magang antara mahasiswa dan perusahaan. Kami percaya 
+                bahwa pengalaman magang yang tepat dapat membentuk karir masa depan 
+                yang cemerlang.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div class="p-6 bg-white rounded-lg">
+                    <h3 class="font-bold text-lg mb-2">✨ Mudah Digunakan</h3>
+                    <p class="text-gray-600">Interface sederhana dan intuitif</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg">
+                    <h3 class="font-bold text-lg mb-2">🔒 Aman & Terpercaya</h3>
+                    <p class="text-gray-600">Data Anda dilindungi dengan enkripsi</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg">
+                    <h3 class="font-bold text-lg mb-2">⚡ Proses Cepat</h3>
+                    <p class="text-gray-600">Apply dan dapatkan respon dengan cepat</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg">
+                    <h3 class="font-bold text-lg mb-2">📊 Tracking Real-time</h3>
+                    <p class="text-gray-600">Monitor status lamaran kapan saja</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-4">Siap Memulai Perjalanan Magang Anda?</h2>
+            <p class="text-xl mb-8">Daftar sekarang dan temukan peluang magang terbaik!</p>
+            <a href="register.html" 
+                class="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition">
+                Daftar Gratis Sekarang
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="mb-2">© 2024 MagangKu. All rights reserved.</p>
+            <p class="text-gray-400">Sistem Pencarian Magang Kampus</p>
+        </div>
+    </footer>
+
+    <script src="js/common.js"></script>
+    <!-- <script src="js/config.js"></script> -->
+    <script>
+         // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Check if already logged in
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        if (token && user) {
+            // Redirect to appropriate dashboard
+            switch(user.role) {
+                case 'ADMIN':
+                    window.location.href = 'admin/dashboard.html';
+                    break;
+                case 'MAHASISWA':
+                    window.location.href = 'mahasiswa/dashboard.html';
+                    break;
+                case 'PERUSAHAAN':
+                    window.location.href = 'perusahaan/dashboard.html';
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>

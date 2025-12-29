@@ -1,0 +1,240 @@
+<!-- lamaran.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamaran Saya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Cari Lowongan</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Saya</a>
+                <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History Magang</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Riwayat Lamaran</h2>
+        <!-- FILTER -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex gap-4">
+                <select id="filter-status" class="px-4 py-2 border rounded focus: outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="DITERIMA">Diterima</option>
+                    <option value="DITOLAK">Ditolak</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="lamaran-list" class="space-y-4">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        // const user = checkAuth('MAHASISWA');
+        // document.getElementById('logout-btn').addEventListener('click', logout);
+
+        // let allLamaran = [];
+
+        // async function fetchLamaran() {
+        //     try {
+        //         const response = await fetch(`${API_URL}/mahasiswa/lamaran`, {
+        //             headers: {
+        //                 'Authorization': `Bearer ${getToken()}`
+        //             }
+        //         });
+        //         allLamaran = await response.json();
+        //         displayLamaran(allLamaran); 
+        //     } catch (error) {
+        //         console.error('Error:', error);
+        //     }
+        // }
+
+        // function displayLamaran(lamaran){
+        //     const container = document.getElementById('lamaran-list');
+
+        //     if (lamaran.length === 0){
+        //         container.innerHTML = `
+        //             <div class="bg-white rounded-lg shadow p-8 text-center">
+        //                 <p class="text-gray-500 mb-4">Belum ada lamaran</p>
+        //                 <a href="lowongan.html" class="text-blue-600 hover:underline">
+        //                     Cari lowongan sekarang →
+        //                 </a>
+        //             </div>
+        //         `;
+        //         return;
+        //     }
+        //     container.innerHTML = lamaran.map(item => `
+        //         <div class="bg-white rounded-lg shadow p-6">
+        //             <div class="flex justify-between items-start mb-4">
+        //                 <div class="flex-1">
+        //                     <h3 class="text-xl font-bold mb-2">${item.lowongan.judul}</h3>
+        //                     <p class="text-gray-600 mb-1">${item.lowongan.perusahaan.namaPerusahaan}</p>
+        //                     <p class="text-sm text-gray-500">
+        //                         📍 ${item.lowongan.lokasi} • ⏱️ ${item.lowongan.durasi}
+        //                     </p>
+        //                 </div>
+        //                 <span class="px-4 py-2 rounded font-semibold ${getStatusClass(item.status)}">
+        //                     ${item.status}
+        //                 </span>
+        //             </div>
+
+        //             <div class="border-t pt-4 mt-4">
+        //                 <p class="text-sm text-gray-600 mb-2">
+        //                     <strong>Tanggal Lamar:</strong> ${new Date(item.tanggalLamar).toLocaleDateString('id-ID', {
+        //                         year: 'numeric',
+        //                         month: 'long',
+        //                         day: 'numeric'
+        //                     })}
+        //                 </p>
+                        
+        //                 ${item.catatan ? `
+        //                     <div class="mt-3 p-3 bg-gray-50 rounded">
+        //                         <p class="text-sm text-gray-700">
+        //                             <strong>Catatan:</strong> ${item.catatan}
+        //                         </p>
+        //                     </div>
+        //                 ` : ''}
+
+        //                 <div class="mt-4 flex gap-2">
+        //                     <button onclick="viewDetail('${item.id}')" 
+        //                         class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        //                         Lihat Detail
+        //                     </button>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     `).join('');
+        // }
+
+        // function getStatusClass(status) {
+        //     switch (status) {
+        //         case 'DITERIMA' : return 'bg-green-100 text-green-700';
+        //         case 'DITOLAK' : return 'bg-red-100 text-red-700';
+        //         default: return 'bg-yellow-100 text-yellow-700';
+        //     }
+        // }
+
+        // document.getElementById('filter-status').addEventListener('change', (e) => {
+        //     const status = e.target.value;
+        //     const filtered = status ? allLamaran.filter(l => l.status === status) : allLamaran;
+        //     displayLamaran(filtered);
+        // });
+
+        // function viewDetail(id) {
+        //     const lamaran = allLamaran.find(l => l.id === id);
+        //     if (!lamaran) return;
+            
+        //     alert(`Detail Lamaran:
+        //     Lowongan: ${lamaran.lowongan.judul}
+        //     Perusahaan: ${lamaran.lowongan.perusahaan.namaPerusahaan}
+        //     Status: ${lamaran.status}
+        //     Tanggal Lamar: ${new Date(lamaran.tanggalLamar).toLocaleDateString('id-ID')}
+
+        //     ${lamaran.catatan ? 'Catatan: ' + lamaran.catatan : ''}`);
+        // }
+
+        // fetchLamaran();
+        const user = initCommon('MAHASISWA');
+        let allLamaran = [];
+
+        async function fetchLamaran() {
+            try {
+                showLoading('lamaran-list');
+                allLamaran = await apiGet('/mahasiswa/lamaran');
+                displayLamaran(allLamaran);
+            } catch (error) {
+                console.error('Error:', error);
+                showError('lamaran-list', 'Gagal memuat data lamaran');
+            }
+        }
+
+        function displayLamaran(lamaran) {
+            const container = document.getElementById('lamaran-list');
+
+            if (lamaran.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-8 text-center">
+                        <p class="text-gray-500 mb-4">Belum ada lamaran</p>
+                        <a href="lowongan.html" class="text-blue-600 hover:underline">
+                            Cari lowongan sekarang →
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lamaran.map(item => `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">${item.lowongan.judul}</h3>
+                            <p class="text-gray-600 mb-1">${item.lowongan.perusahaan.namaPerusahaan}</p>
+                            <p class="text-sm text-gray-500">
+                                📍 ${item.lowongan.lokasi} • ⏱️ ${item.lowongan.durasi}
+                            </p>
+                        </div>
+                        <span class="px-4 py-2 rounded font-semibold ${getStatusClass(item.status)}">
+                            ${item.status}
+                        </span>
+                    </div>
+
+                    <div class="border-t pt-4 mt-4">
+                        <p class="text-sm text-gray-600 mb-2">
+                            <strong>Tanggal Lamar:</strong> ${formatDate(item.tanggalLamar)}
+                        </p>
+                        
+                        ${item.catatan ? `
+                            <div class="mt-3 p-3 bg-gray-50 rounded">
+                                <p class="text-sm text-gray-700">
+                                    <strong>Catatan:</strong> ${item.catatan}
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        <div class="mt-4">
+                            <button onclick="viewDetail('${item.id}')" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Lihat Detail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('filter-status').addEventListener('change', (e) => {
+            const status = e.target.value;
+            const filtered = status ? allLamaran.filter(l => l.status === status) : allLamaran;
+            displayLamaran(filtered);
+        });
+
+        function viewDetail(id) {
+            const lamaran = allLamaran.find(l => l.id === id);
+            if (!lamaran) return;
+            
+            alert(`Detail Lamaran:
+            Lowongan: ${lamaran.lowongan.judul}
+            Perusahaan: ${lamaran.lowongan.perusahaan.namaPerusahaan}
+            Status: ${lamaran.status}
+            Tanggal Lamar: ${formatDate(lamaran.tanggalLamar)}
+
+            ${lamaran.catatan ? 'Catatan: ' + lamaran.catatan : ''}`);
+        }
+
+        fetchLamaran();
+    </script>
+</body>
+</html>

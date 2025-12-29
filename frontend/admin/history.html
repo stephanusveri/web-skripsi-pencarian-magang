@@ -1,0 +1,531 @@
+<!-- admin/history.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Magang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Admin</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
+                <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">History Magang</h2>
+            <button id="add-btn" class="bg-blue-500 text-white px-6 py-2">
+                + Tambah History
+            </button>
+        </div>
+
+        <!-- filter -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter Jurusan</label>
+                    <select name="" id="filter-jurusan" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Semua Jurusan</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cari Mahasiswa/Perusahaan</label>
+                    <input type="text" id="search-input" placeholder="Ketik untuk mencari..." class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-end gap-2">
+                    <button id="reset-filter" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Reset
+                    </button>
+                </div>
+            </div>
+            <div class="mt-3 text-sm text-gray-600">
+                Menampilkan <span id="count-display" class="font-semibold">0</span> dari <span id="total-display" class="font-semibold">0</span> history
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mahasiswa</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perusahaan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posisi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Periode</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nilai</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="form-title" class="text-2xl font-bold">Tambah History Magang</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <form id="history-form">
+                <input type="hidden" id="history-id">
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Nama Mahasiswa *</label>
+                        <input type="text" id="namaMahasiswa" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">NIM *</label>
+                        <input type="text" id="nimMahasiswa" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Jurusan *</label>
+                    <input type="text" id="jurusanMahasiswa" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Nama Perusahaan *</label>
+                    <input type="text" id="namaPerusahaan" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Posisi Magang *</label>
+                    <input type="text" id="posisiMagang" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Website Perusahaan <span class="text-sm text-gray-500">(Opsional)</span></label>
+                    <input type="url" id="websitePerusahaan" placeholder="https://example.com" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                         <label class="block text-gray-700 mb-2">Tanggal Mulai *</label>
+                        <input type="date" id="tanggalMulai" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                         <label class="block text-gray-700 mb-2">Tanggal Selesai *</label>
+                        <input type="date" id="tanggalSelesai" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Nilai Akhir</label>
+                    <input type="number" id="nilaiAkhir" step="0.01" min="0" max="100"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Catatan</label>
+                    <textarea id="catatan" rows="4"
+                        class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                    Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detail -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Detail History Magang</h3>
+                <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div id="detail-content" class="space-y-6">
+                <!-- Content akan diisi via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('ADMIN');
+        let isEditMode = false;
+        let currentEditId = null;
+        let allHistory = [];
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch(`${API_URL}/admin/history`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                allHistory = data;
+                populateJurusanFilter(data);
+                displayHistory(data);
+                updateCount(data.length, data.length);
+                displayHistory(data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat data history');
+            }
+        }
+
+        function populateJurusanFilter(history) {
+            const jurusanSet = new Set();
+            history.forEach(item => {
+                if (item.jurusanMahasiswa) {
+                    jurusanSet.add(item.jurusanMahasiswa);
+                }
+            });
+
+            const select = document.getElementById('filter-jurusan');
+            const curentValue = select.value;
+
+            select.innerHTML = '<option value="">Semua Jurusan</option>';
+
+            Array.from(jurusanSet).sort().forEach(jurusan => {
+                const option = document.createElement('option');
+                option.value = jurusan;
+                option.textContent = jurusan;
+                select.appendChild(option);
+            });
+
+            select.value = curentValue;
+        }
+
+        function filterHistory() {
+            const jurusanFilter = document.getElementById('filter-jurusan').value.toLowerCase();
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+            const filtered = allHistory.filter(item => {
+                const matchJurusan = !jurusanFilter || 
+                (item.jurusanMahasiswa && item.jurusanMahasiswa.toLowerCase() === jurusanFilter);
+
+                const matchSearch = !searchTerm ||
+                    (item.namaMahasiswa && item.namaMahasiswa.toLowerCase().includes(searchTerm)) ||
+                    (item.nimMahasiswa && item.nimMahasiswa.toLowerCase().includes(searchTerm)) || 
+                    (item.namaPerusahaan && item.namaPerusahaan.toLowerCase.includes(searchTerm)) ||
+                    (item.posisiMagang && item.posisiMagang.toLowerCase().includes(searchTerm));
+                
+                return matchJurusan && matchSearch;
+            });
+
+            displayHistory(filtered);
+            updateCount(filtered.length, allHistory.length);
+        }
+
+        function updateCount(showing, total) {
+            document.getElementById('count-display').textContent = showing;
+            document.getElementById('total-display').textContent = total;
+        }
+
+        document.getElementById('filter-jurusan').addEventListener('change', filterHistory);
+        document.getElementById('search-input').addEventListener('input', filterHistory);
+        document.getElementById('reset-filter').addEventListener('click', () => {
+            document.getElementById('filter-jurusan').value = '';
+            document.getElementById('search-input').value = '';
+            filterHistory();
+        });
+
+        async function viewHistory(id) {
+            document.getElementById('detail-modal').classList.remove('hidden');
+            
+            document.getElementById('detail-content').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Memuat data...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/history/${id}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                
+                if (!response.ok) throw new Error('Gagal mengambil data');
+                
+                const data = await response.json();
+                displayDetail(data);
+            } catch (error) {
+                document.getElementById('detail-content').innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                        <p class="text-red-600">Gagal memuat detail history</p>
+                        <p class="text-gray-500 text-sm mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDetail(data) {
+            const duration = Math.ceil((new Date(data.tanggalSelesai) - new Date(data.tanggalMulai)) / (1000 * 60 * 60 * 24 * 30));
+            
+            document.getElementById('detail-content').innerHTML = `
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
+                    <h4 class="text-2xl font-bold mb-2">${data.namaMahasiswa || 'N/A'}</h4>
+                    <p class="opacity-90">${data.nimMahasiswa || 'N/A'} - ${data.jurusanMahasiswa || 'N/A'}</p>
+                </div>
+
+                <!-- Info Perusahaan -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">🏢</span>
+                        Informasi Perusahaan & Posisi
+                    </h5>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-500">Nama Perusahaan</label>
+                            <p class="font-medium">${data.namaPerusahaan || '-'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Posisi Magang</label>
+                            <p class="font-medium">${data.posisiMagang || '-'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Website Perusahaan</label>
+                            <p class="font-medium">
+                                ${data.websitePerusahaan ? `<a href="${data.websitePerusahaan}" target="_blank" class="text-blue-600 hover:underline">${data.websitePerusahaan}</a>` : '-'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Periode & Nilai -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📅</span>
+                        Periode & Penilaian
+                    </h5>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-500">Tanggal Mulai</label>
+                            <p class="font-medium">${new Date(data.tanggalMulai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Tanggal Selesai</label>
+                            <p class="font-medium">${new Date(data.tanggalSelesai).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Durasi</label>
+                            <p class="font-medium">${duration} bulan</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Nilai Akhir</label>
+                            <p class="font-medium">
+                                ${data.nilaiAkhir ? `<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-lg">${data.nilaiAkhir}</span>` : '<span class="text-gray-400">Belum dinilai</span>'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan -->
+                ${data.catatan ? `
+                    <div class="border rounded-lg p-6">
+                        <h5 class="text-lg font-semibold mb-4 flex items-center">
+                            <span class="bg-yellow-100 text-yellow-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📝</span>
+                            Catatan
+                        </h5>
+                        <p class="text-gray-700 whitespace-pre-wrap">${data.catatan}</p>
+                    </div>
+                ` : ''}
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="editHistory('${data.id}')" 
+                        class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">
+                        ✏️ Edit Data
+                    </button>
+                    <button onclick="deleteHistory('${data.id}')" 
+                        class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                        🗑️ Hapus History
+                    </button>
+                </div>
+            `;
+        }
+
+        function displayHistory(history) {
+            const tbody = document.getElementById('history-table');
+            
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">Belum ada data</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = history.map(item => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div>
+                            <p class="font-semibold">${item.namaMahasiswa || 'N/A'}</p>
+                            <p class="text-sm text-gray-600">${item.nimMahasiswa || 'N/A'}</p>
+                            <span class="inline-block mt-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">${item.jurusanMahasiswa || '-'}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-medium">${item.namaPerusahaan || '-'}</p>
+                        ${item.websitePerusahaan ? `<a href="${item.websitePerusahaan}" target="_blank" class="text-xs text-blue-600 hover:underline">Website</a>` : ''}
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm">${item.posisiMagang || '-'}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm">
+                            <p>${new Date(item.tanggalMulai).toLocaleDateString('id-ID')}</p>
+                            <p class="text-gray-600">s/d</p>
+                            <p>${new Date(item.tanggalSelesai).toLocaleDateString('id-ID')}</p>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        ${item.nilaiAkhir ? 
+                            `<span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">${item.nilaiAkhir}</span>` : 
+                            '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="px-6 py-4 space-x-2">
+                        <button onclick="viewHistory('${item.id}')" 
+                            class="text-blue-600 hover:underline">Lihat</button>
+                        <button onclick="editHistory('${item.id}')" 
+                            class="text-yellow-600 hover:underline">Edit</button>
+                        <button onclick="deleteHistory('${item.id}')" 
+                            class="text-red-600 hover:underline">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function editHistory(id) {
+            document.getElementById('detail-modal').classList.add('hidden');
+            
+            isEditMode = true;
+            currentEditId = id;
+            
+            document.getElementById('form-title').textContent = 'Edit History Magang';
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/history/${id}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                
+                if (!response.ok) throw new Error('Gagal mengambil data');
+                
+                const data = await response.json();
+                
+                // Populate form
+                document.getElementById('history-id').value = data.id;
+                document.getElementById('namaMahasiswa').value = data.namaMahasiswa || '';
+                document.getElementById('nimMahasiswa').value = data.nimMahasiswa || '';
+                document.getElementById('jurusanMahasiswa').value = data.jurusanMahasiswa || '';
+                document.getElementById('namaPerusahaan').value = data.namaPerusahaan || '';
+                document.getElementById('posisiMagang').value = data.posisiMagang || '';
+                document.getElementById('websitePerusahaan').value = data.websitePerusahaan || '';
+                document.getElementById('tanggalMulai').value = data.tanggalMulai.split('T')[0];
+                document.getElementById('tanggalSelesai').value = data.tanggalSelesai.split('T')[0];
+                document.getElementById('nilaiAkhir').value = data.nilaiAkhir || '';
+                document.getElementById('catatan').value = data.catatan || '';
+                
+                document.getElementById('form-modal').classList.remove('hidden');
+                
+            } catch (error) {
+                alert('Gagal memuat data: ' + error.message);
+            }
+        }
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+            isEditMode = false;
+            currentEditId = null;
+            document.getElementById('form-title').textContent = 'Tambah History Magang';
+            document.getElementById('history-form').reset();
+            document.getElementById('form-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('form-modal').classList.add('hidden');
+        });
+
+        document.getElementById('close-detail-modal').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        document.getElementById('history-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                namaMahasiswa: document.getElementById('namaMahasiswa').value,
+                nimMahasiswa: document.getElementById('nimMahasiswa').value,
+                jurusanMahasiswa: document.getElementById('jurusanMahasiswa').value,
+                namaPerusahaan: document.getElementById('namaPerusahaan').value,
+                posisiMagang: document.getElementById('posisiMagang').value,
+                websitePerusahaan: document.getElementById('websitePerusahaan').value || null,
+                tanggalMulai: document.getElementById('tanggalMulai').value,
+                tanggalSelesai: document.getElementById('tanggalSelesai').value,
+                nilaiAkhir: parseFloat(document.getElementById('nilaiAkhir').value) || null,
+                catatan: document.getElementById('catatan').value || null
+            };
+
+            try {
+                const url = isEditMode 
+                    ? `${API_URL}/admin/history/${currentEditId}`
+                    : `${API_URL}/admin/history`;
+                
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Gagal menyimpan data');
+                }
+
+                alert(isEditMode ? 'History berhasil diupdate!' : 'History berhasil ditambahkan!');
+                document.getElementById('form-modal').classList.add('hidden');
+                fetchHistory();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        async function deleteHistory(id) {
+            if (!confirm('Yakin hapus history ini?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/history/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Gagal menghapus history');
+
+                alert('History berhasil dihapus');
+                document.getElementById('detail-modal').classList.add('hidden');
+                fetchHistory();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        fetchHistory();
+    </script>
+</body>
+</html>
+

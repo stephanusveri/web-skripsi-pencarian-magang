@@ -1,0 +1,476 @@
+<!-- admin/perusahaan.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Perusahaan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Admin</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
+                <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Kelola Perusahaan</h2>
+            <button id="add-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                + Tambah Perusahaan
+            </button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Perusahaan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telepon</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alamat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="perusahaan-table" class="divide-y divide-gray-200"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form
+    <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 overflow-y-auto z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Tambah Perusahaan</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">x</button>
+            </div>
+
+            <form id="perusahaan-form">
+                <input type="hidden" id="perusahaan-id">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Password *</label>
+                    <input type="password" id="password" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Nama Perusahaan *</label>
+                    <input type="text" id="namaPerusahaan" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Alamat *</label>
+                    <textarea id="alamat" rows="3" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Telepon *</label>
+                    <input type="tel" id="telepon" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Website</label>
+                    <input type="url" id="website" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                    Simpan
+                </button>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- Modal form tambah/edit -->
+    <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 overflow-y-auto z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="form-title" class="text-2xl font-bold">Tambah Perusahaan</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <form id="perusahaan-form">
+                <input type="hidden" id="perusahaan-id">
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4" id="password-field">
+                    <label class="block text-gray-700 mb-2">Password <span id="password-hint" class="text-sm text-gray-500">(Kosongkan jika tidak ingin mengubah)</span></label>
+                    <input type="password" id="password" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Nama Perusahaan *</label>
+                    <input type="text" id="namaPerusahaan" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Alamat *</label>
+                    <textarea id="alamat" rows="3" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Telepon *</label>
+                    <input type="tel" id="telepon" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Website</label>
+                    <input type="url" id="website" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                    Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detail Perusahaan -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 overflow-y-auto z-50">
+        <div class="bg-white rounded-lg max-w-3xl w-full p-6 my-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Detail Perusahaan</h3>
+                <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div id="detail-content" class="space-y-6">
+                <!-- loading state -->
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Memuat data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('ADMIN');
+        let isEditMode = false;
+        let currentEditId = null;
+
+        async function fetchPerusahaan() {
+            try {
+                const response = await fetch(`${API_URL}/admin/perusahaan`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                displayPerusahaan(data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat data perusahaan');
+            }
+        }
+
+        async function viewPerusahaan(id) {
+            document.getElementById('detail-modal').classList.remove('hidden');
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Memuat data...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_URL}/admin/perusahaan/${id}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!res.ok) throw new Error('Gagal mengambil data');
+
+                const data = await res.json();
+                displayDetail(data);
+            } catch (error) {
+                document.getElementById('detail-content').innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
+                        <p class="text-red-600">Gagal memuat data perusahaan</p>
+                        <p class="text-gray-500 text-sm mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayDetail(data) {
+            const createdDate = new Date(data.createdAt).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            document.getElementById('detail-content').innerHTML = `
+                <!-- Header Info -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
+                    <h4 class="text-2xl font-bold mb-2">${data.namaPerusahaan}</h4>
+                    <p class="opacity-90">Terdaftar sejak ${createdDate}</p>
+                </div>
+
+                <!-- Informasi Kontak -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📧</span>
+                        Informasi Kontak
+                    </h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-500">Email</label>
+                            <p class="font-medium">${data.email}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-500">Telepon</label>
+                            <p class="font-medium">${data.telepon || '-'}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-sm text-gray-500">Website</label>
+                            <p class="font-medium">
+                                ${data.website ? `<a href="${data.website}" target="_blank" class="text-blue-600 hover:underline">${data.website}</a>` : '-'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alamat -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📍</span>
+                        Alamat
+                    </h5>
+                    <p class="text-gray-700">${data.alamat}</p>
+                </div>
+
+                <!-- Statistik -->
+                <div class="border rounded-lg p-6">
+                    <h5 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📊</span>
+                        Statistik
+                    </h5>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-blue-50 p-4 rounded text-center">
+                            <p class="text-2xl font-bold text-blue-600">${data._count?.lowongan || 0}</p>
+                            <p class="text-sm text-gray-600">Total Lowongan</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded text-center">
+                            <p class="text-2xl font-bold text-green-600">${data._count?.lamaran || 0}</p>
+                            <p class="text-sm text-gray-600">Total Lamaran</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded text-center">
+                            <p class="text-2xl font-bold text-yellow-600">${data.lowonganAktif || 0}</p>
+                            <p class="text-sm text-gray-600">Lowongan Aktif</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded text-center">
+                            <p class="text-2xl font-bold text-purple-600">${data.mahasiswaDiterima || 0}</p>
+                            <p class="text-sm text-gray-600">Mahasiswa Diterima</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lowongan Terbaru (jika ada) -->
+                ${data.lowongan && data.lowongan.length > 0 ? `
+                    <div class="border rounded-lg p-6">
+                        <h5 class="text-lg font-semibold mb-4 flex items-center">
+                            <span class="bg-orange-100 text-orange-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">💼</span>
+                            Lowongan Terbaru
+                        </h5>
+                        <div class="space-y-3">
+                            ${data.lowongan.slice(0, 5).map(lowongan => `
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                                    <div>
+                                        <p class="font-medium">${lowongan.judul}</p>
+                                        <p class="text-sm text-gray-500">${lowongan.lokasi} • ${lowongan.durasi}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded text-xs ${
+                                        lowongan.status === 'BUKA' 
+                                            ? 'bg-green-100 text-green-700' 
+                                            : 'bg-red-100 text-red-700'
+                                    }">
+                                        ${lowongan.status}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="editPerusahaan('${data.id}')" 
+                        class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">
+                        ✏️ Edit Data
+                    </button>
+                    <button onclick="deletePerusahaan('${data.id}')" 
+                        class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+                        🗑️ Hapus Perusahaan
+                    </button>
+                </div>
+            `;
+        }
+
+        function displayPerusahaan(perusahaan) {
+            const tbody = document.getElementById('perusahaan-table');
+            
+            if (perusahaan.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">Belum ada data</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = perusahaan.map(item => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">${item.namaPerusahaan}</td>
+                    <td class="px-6 py-4">${item.email}</td>
+                    <td class="px-6 py-4">${item.telepon}</td>
+                    <td class="px-6 py-4">${item.alamat}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewPerusahaan('${item.id}')" 
+                            class="text-blue-600 hover:underline mr-2">Lihat</button>
+                        <button onclick="deletePerusahaan('${item.id}')" 
+                            class="text-red-600 hover:underline">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function  editPerusahaan(id) {
+            // close modal detail 
+            document.getElementById('detail-modal').classList.add('hidden');
+
+            // mode edit
+            isEditMode = true;
+            currentEditId = id;
+
+            // update judul form
+            document.getElementById('form-title').textContent = 'Edit Perusahaan';
+            document.getElementById('password-hint').classList.remove('hidden');
+
+            // get data perusahaan
+            try {
+                const res = await fetch(`${API_URL}/admin/perusahaan/${id}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!res.ok) throw new Error('Gagal mengambil data');
+
+                const data = await res.json();
+
+                // isi form dengan data yang ada
+                document.getElementById('perusahaan-id').value = data.id;
+                document.getElementById('email').value = data.email;
+                document.getElementById('password').value = '';
+                document.getElementById('password').removeAttribute('required');
+                document.getElementById('namaPerusahaan').value = data.namaPerusahaan;
+                document.getElementById('alamat').value = data.alamat;
+                document.getElementById('telepon').value = data.telepon || '';
+                document.getElementById('website').value = data.website || '';
+
+                document.getElementById('form-modal').classList.remove('hidden');
+
+            } catch (error) {
+                alert('Gagal memuat data perusahaan: ' + error.message);
+            }
+        }
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+            isEditMode = false;
+            currentEditId = null;
+            document.getElementById('form-title').textContent = 'Tambah Perusahaan';
+            document.getElementById('password-hint').classList.add('hidden');
+            document.getElementById('password').setAttribute('required', 'required');
+            document.getElementById('perusahaan-form').reset();
+            document.getElementById('form-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('form-modal').classList.add('hidden');
+        });
+
+        document.getElementById('close-detail-modal').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        document.getElementById('perusahaan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                email: document.getElementById('email').value,
+                // password: document.getElementById('password').value,
+                // role: 'PERUSAHAAN',
+                namaPerusahaan: document.getElementById('namaPerusahaan').value,
+                alamat: document.getElementById('alamat').value,
+                telepon: document.getElementById('telepon').value,
+                website: document.getElementById('website').value
+            };
+
+            const passwordValue = document.getElementById('password').value;
+            if (passwordValue || !isEditMode) {
+                data.password = passwordValue;
+            }
+
+            // role hanya untuk mode add
+            if (!isEditMode) {
+                data.role = 'PERUSAHAAN';
+            }
+
+           try {
+                const url = isEditMode 
+                    ? `${API_URL}/admin/perusahaan/${currentEditId}`
+                    : `${API_URL}/admin/perusahaan`;
+                
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Gagal menyimpan data');
+                }
+
+                alert(isEditMode ? 'Perusahaan berhasil diupdate!' : 'Perusahaan berhasil ditambahkan!');
+                document.getElementById('form-modal').classList.add('hidden');
+                fetchPerusahaan();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        async function deletePerusahaan(id) {
+            if (!confirm('Yakin hapus perusahaan ini? Semua data lowongan dan lamaran terkait juga akan terhapus.')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/perusahaan/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Gagal menghapus perusahaan');
+
+                alert('Perusahaan berhasil dihapus');
+                document.getElementById('detail-modal').classList.add('hidden');
+                fetchPerusahaan();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        fetchPerusahaan();
+    </script>
+</body>
+</html>

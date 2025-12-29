@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamaran Masuk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+     <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Perusahaan</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan Saya</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Masuk</a>
+                <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6">Lamaran Masuk</h2>
+
+        <!-- Filter -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex gap-4">
+                <select id="filter-lowongan" 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Lowongan</option>
+                </select>
+                <select id="filter-status" 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="DITERIMA">Diterima</option>
+                    <option value="DITOLAK">Ditolak</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div id="lamaran-list" class="space-y-4"></div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-bold">Detail Lamaran</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">x</button>
+            </div>
+
+            <div id="modal-content"></div>
+
+            <div class="mt-6 flex gap-2">
+                <button id="approve-btn" class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    Terima
+                </button>
+                <button id="reject-btn" class="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                    Tolak
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        checkAuth('PERUSAHAAN');
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+        let allLamaran = [];
+        let myLowongan = [];
+        let currentLamaran = null;
+
+        async function fetchData() {
+            try {
+                const [lowonganRes, lamaranRes] = await Promise.all([
+                    fetch(`${API_URL}/perusahaan/lowongan`, {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    }),
+                    fetch(`${API_URL}/perusahaan/lamaran`, {
+                        headers: { 'Authorization': `Bearer ${getToken()}` }
+                    })
+                ]);
+
+                myLowongan = await lowonganRes.json();
+                allLamaran = await lamaranRes.json();
+
+                populateLowonganFilter();
+                displayLamaran(allLamaran);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function populateLowonganFilter() {
+            const select = document.getElementById('filter-lowongan');
+            myLowongan.forEach(lowongan => {
+                const option = documentc.creatElement('option');
+                option.value = lowongan.id;
+                option.textContent = lowongan.judul;
+                select.appendChild(option);
+            });
+        }
+
+        function displayLamaran(lamaran){
+            const container = document.getElementById('lamaran-list');
+
+            if (lamaran-length === 0){
+                container.innerHTML = '<div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">Belum ada lamaran</div>';
+                return;
+            }
+
+            container.innerHTML = lamaran.map(item => `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">${item.mahasiswa.nama}</h3>
+                            <p class="text-gray-600 mb-1">NIM: ${item.mahasiswa.nim}</p>
+                            <p class="text-gray-600 mb-1">${item.mahasiswa.jurusan} - Semester ${item.mahasiswa.semester}</p>
+                            <p class="text-sm text-gray-500 mt-2">
+                                <strong>Lowongan:</strong> ${item.lowongan.judul}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                <strong>Tanggal Lamar:</strong> ${new Date(item.tanggalLamar).toLocaleDateString('id-ID')}
+                            </p>
+                        </div>
+                        <span class="px-4 py-2 rounded font-semibold ${getStatusClass(item.status)}">
+                            ${item.status}
+                        </span>
+                    </div>
+                    <div class="mt-4">
+                        <button onclick="viewDetail('${item.id}')" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Lihat Detail
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'DITERIMA': return 'bg-green-100 text-green-700';
+                case 'DITOLAK' : return 'bg-red-100 text-red-700';
+                default: return 'bg-yellow-100 text-yellow-700';
+            }
+        }
+
+        function viewDetail(id) {
+            currentLamaran = allLamaran.find(l => l.id === id);
+            if (!currentLamaran) return;
+
+            const mhs = currentLamaran.mahasiswa;
+
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-700">Informasi Mahasiswa</h4>
+                        <p><strong>Nama:</strong> ${mhs.nama}</p>
+                        <p><strong>NIM:</strong> ${mhs.nim}</p>
+                        <p><strong>Jurusan:</strong> ${mhs.jurusan}</p>
+                        <p><strong>Semester:</strong> ${mhs.semester}</p>
+                        ${mhs.cv ? `<p><strong>CV:</strong> <a href="${mhs.cv}" target="_blank" class="text-blue-600 hover:underline">Lihat CV</a></p>` : ''}
+                        ${mhs.transkrip ? `<p><strong>Transkrip:</strong> <a href="${mhs.transkrip}" target="_blank" class="text-blue-600 hover:underline">Lihat Transkrip</a></p>` : ''}
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700">Surat Lamaran</h4>
+                        <p class="text-gray-700 whitespace-pre-wrap">${currentLamaran.suratLamaran}</p>
+                    </div>
+                    ${currentLamaran.catatan ? `
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Catatan</h4>
+                            <p class="text-gray-700">${currentLamaran.catatan}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Show/hide buttons based on status
+            const approveBtn = document.getElementById('approve-btn');
+            const rejectBtn = document.getElementById('reject-btn');
+            
+            if (currentLamaran.status !== 'PENDING') {
+                approveBtn.style.display = 'none';
+                rejectBtn.style.display = 'none';
+            } else {
+                approveBtn.style.display = 'block';
+                rejectBtn.style.display = 'block';
+            }
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('approve-btn').addEventListener('click', () => updateStatus('DITERIMA'));
+        document.getElementById('reject-btn').addEventListener('click', () => updateStatus('DITOLAK'));
+
+        async function updateStatus(status) {
+            if (!currentLamaran) return;
+
+            try {
+                const response = await fetch(`${API_URL}/perusahaan/lamaran/${currentLamaran.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) throw new Error('Failed to update');
+
+                alert(`Lamaran berhasil ${status === 'DITERIMA' ? 'diterima' : 'ditolak'}!`);
+                document.getElementById('detail-modal').classList.add('hidden');
+                fetchData();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+         // Filters
+        document.getElementById('filter-lowongan').addEventListener('change', filterLamaran);
+        document.getElementById('filter-status').addEventListener('change', filterLamaran);
+
+        function filterLamaran() {
+            const lowonganId = document.getElementById('filter-lowongan').value;
+            const status = document.getElementById('filter-status').value;
+
+            const filtered = allLamaran.filter(item => {
+                const matchLowongan = !lowonganId || item.lowonganId === lowonganId;
+                const matchStatus = !status || item.status === status;
+                return matchLowongan && matchStatus;
+            });
+
+            displayLamaran(filtered);
+        }
+
+        fetchData();
+
+    </script>
+</body>
+</html>

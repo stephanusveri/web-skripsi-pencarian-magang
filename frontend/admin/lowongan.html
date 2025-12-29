@@ -1,0 +1,251 @@
+<!-- admin/lowongan.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Lowongan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Admin</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
+                <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan</a>
+                <a href="history.html" class="text-blue-600 hover:underline">History</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Kelola Lowongan Magang</h2>
+            <div class="flex gap-4">
+                <input type="text" id="search" placeholder="Cari lowongan..." 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="filter-status" 
+                    class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="BUKA">Buka</option>
+                    <option value="TUTUP">Tutup</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="lowongan-list" class="space-y-4"></div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-bold">Detail Lowongan</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">x</button>
+            </div>
+
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('ADMIN');
+        let allLowongan = [];
+
+        async function fetchLowongan() {
+            try {
+                const response = await fetch (`${API_URL}/lowongan`);
+                allLowongan = await response.json();
+                displayLowongan(allLowongan);
+            } catch (error) {
+            console.error('Error:', error);
+            } 
+        }
+
+        function displayLowongan(lowongan) {
+            const container = document.getElementById('lowongan-list');
+
+            if (lowongan.length === 0){
+                container.innerHTML = `
+                    <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                        Tidak ada lowongan
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = lowongan.map(item => `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">${item.judul}</h3>
+                            <p class="text-gray-700 mb-2">${item.deskripsi}</p>
+                            <div class="flex gap-4 text-sm text-gray-600 mb-2">
+                                <span>🏢 ${item.perusahaan.namaPerusahaan}</span>
+                                <span>📍 ${item.lokasi}</span>
+                                <span>⏱️ ${item.durasi}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="text-sm px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                                    👥 ${item._count.lamaran}/${item.kuota} Pelamar
+                                </span>
+                                <span class="text-sm text-gray-500">
+                                    📅 ${new Date(item.tanggalMulai).toLocaleDateString('id-ID')} - 
+                                    ${new Date(item.tanggalSelesai).toLocaleDateString('id-ID')}
+                                </span>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded ${
+                            item.status === 'BUKA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }">
+                            ${item.status}
+                        </span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="viewDetail('${item.id}')" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Lihat Detail
+                        </button>
+                        <button onclick="updateStatus('${item.id}', '${item.status === 'BUKA' ? 'TUTUP' : 'BUKA'}')" 
+                            class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                            ${item.status === 'BUKA' ? 'Tutup' : 'Buka'}
+                        </button>
+                        <button onclick="deleteLowongan('${item.id}')" 
+                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function viewDetail(id){
+            const lowongan = allLowongan.find(l => l.id === id);
+            if (!lowongan) return;
+
+            document.getElementById('modal-content').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-gray-700">Perusahaan</h4>
+                        <p class="text-lg">${lowongan.perusahaan.namaPerusahaan}</p>
+                        <p class="text-sm text-gray-600">${lowongan.perusahaan.alamat}</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-700">Deskripsi</h4>
+                        <p class="text-gray-700">${lowongan.deskripsi}</p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-semibold text-gray-700">Persyaratan</h4>
+                        <p class="text-gray-700 whitespace-pre-wrap">${lowongan.persyaratan}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Lokasi</h4>
+                            <p>${lowongan.lokasi}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Durasi</h4>
+                            <p>${lowongan.durasi}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Kuota</h4>
+                            <p>${lowongan.kuota} orang</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Pelamar</h4>
+                            <p>${lowongan._count.lamaran} orang</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Periode</h4>
+                            <p class="text-sm">
+                                ${new Date(lowongan.tanggalMulai).toLocaleDateString('id-ID')} - 
+                                ${new Date(lowongan.tanggalSelesai).toLocaleDateString('id-ID')}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-700">Status</h4>
+                            <span class="px-2 py-1 rounded ${
+                                lowongan.status === 'BUKA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            }">
+                                ${lowongan.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+        
+        async function updateStatus(id, newStatus) {
+            if (!confirm(`Yakin ${newStatus === 'BUKA' ? 'membuka' : 'menutup'} lowongan ini?`)) return;
+
+            try {
+                await fetch(`${API_URL}/lowongan/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                alert('Status berhasil diupdate');
+                fetchLowongan();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function deleteLowongan(id) {
+            if (!confirm('Yakin hapus lowongan ini? Semua lamaran akan ikut terhapus!')) return;
+
+            try {
+                await fetch(`${API_URL}/lowongan/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                alert('Lowongan berhasil dihapus');
+                fetchLowongan();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Search & Filter
+        document.getElementById('search').addEventListener('input', filterLowongan);
+        document.getElementById('filter-status').addEventListener('change', filterLowongan);
+
+        function filterLowongan() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+
+            const filtered = allLowongan.filter(item => {
+                const matchSearch = 
+                    item.judul.toLowerCase().includes(search) ||
+                    item.perusahaan.namaPerusahaan.toLowerCase().includes(search) ||
+                    item.lokasi.toLowerCase().includes(search);
+                const matchStatus = !status || item.status === status;
+                return matchSearch && matchStatus;
+            });
+
+            displayLowongan(filtered);
+        }
+
+        fetchLowongan();
+    </script>
+</body>
+</html>

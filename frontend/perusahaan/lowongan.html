@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Lowongan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Portal Perusahaan</h1>
+            <div class="space-x-4">
+                <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan Saya</a>
+                <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Masuk</a>
+                <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Kelola Lowongan Magang</h2>
+            <button id="add-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                + Tambah Lowongan
+            </button>
+        </div>
+
+        <div id="lowongan-list" class="space-y-4"></div>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">Tambah Lowongan</h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+
+                <form id="lowongan-form">
+                    <input type="hidden" id="lowongan-id">
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Judul Lowongan *</label>
+                        <input type="text" id="judul" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Deskripsi *</label>
+                        <textarea id="deskripsi" rows="4" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">Persyaratan *</label>
+                        <textarea id="persyaratan" rows="4" required
+                            class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Lokasi *</label>
+                            <input type="text" id="lokasi" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Durasi *</label>
+                            <input type="text" id="durasi" placeholder="Contoh: 3 bulan" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Kuota *</label>
+                            <input type="number" id="kuota" min="1" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Status *</label>
+                            <select id="status" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="BUKA">Buka</option>
+                                <option value="TUTUP">Tutup</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Tanggal Mulai *</label>
+                            <input type="date" id="tanggalMulai" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Tanggal Selesai *</label>
+                            <input type="date" id="tanggalSelesai" required
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                        Simpan Lowongan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script>
+        const user = initCommon('PERUSAHAAN');
+
+        let currentLowongan = null;
+
+        async function fetchLowongan() {
+            try {
+                const response = await fetch(`${API_URL}/perusahaan/lowongan`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                displayLowongan(data);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayLowongan(lowongan) {
+            const container = document.getElementById('lowongan-list');
+            
+            if (lowongan.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">Belum ada lowongan</p>';
+                return;
+            }
+
+            container.innerHTML = lowongan.map(item => `
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-2">${item.judul}</h3>
+                            <p class="text-gray-700 mb-2">${item.deskripsi}</p>
+                            <div class="flex gap-4 text-sm text-gray-600">
+                                <span>📍 ${item.lokasi}</span>
+                                <span>⏱️ ${item.durasi}</span>
+                                <span>👥 ${item._count?.lamaran || 0}/${item.kuota}</span>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded ${
+                            item.status === 'BUKA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }">
+                            ${item.status}
+                        </span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editLowongan('${item.id}')" 
+                            class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                            Edit
+                        </button>
+                        <button onclick="deleteLowongan('${item.id}')" 
+                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+            currentLowongan = null;
+            document.getElementById('lowongan-form').reset();
+            document.getElementById('form-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('form-modal').classList.add('hidden');
+        });
+
+        document.getElementById('lowongan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                judul: document.getElementById('judul').value,
+                deskripsi: document.getElementById('deskripsi').value,
+                persyaratan: document.getElementById('persyaratan').value,
+                lokasi: document.getElementById('lokasi').value,
+                durasi: document.getElementById('durasi').value,
+                kuota: parseInt(document.getElementById('kuota').value),
+                status: document.getElementById('status').value,
+                tanggalMulai: new Date(document.getElementById('tanggalMulai').value).toISOString(),
+                tanggalSelesai: new Date(document.getElementById('tanggalSelesai').value).toISOString()
+            };
+
+            try {
+                const url = currentLowongan 
+                    ? `${API_URL}/lowongan/${currentLowongan}`
+                    : `${API_URL}/lowongan`;
+                
+                const response = await fetch(url, {
+                    method: currentLowongan ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('Failed to save');
+
+                alert('Lowongan berhasil disimpan!');
+                document.getElementById('form-modal').classList.add('hidden');
+                fetchLowongan();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        async function editLowongan(id) {
+            try {
+                const response = await fetch(`${API_URL}/lowongan/${id}`);
+                const lowongan = await response.json();
+
+                currentLowongan = id;
+                document.getElementById('judul').value = lowongan.judul;
+                document.getElementById('deskripsi').value = lowongan.deskripsi;
+                document.getElementById('persyaratan').value = lowongan.persyaratan;
+                document.getElementById('lokasi').value = lowongan.lokasi;
+                document.getElementById('durasi').value = lowongan.durasi;
+                document.getElementById('kuota').value = lowongan.kuota;
+                document.getElementById('status').value = lowongan.status;
+                document.getElementById('tanggalMulai').value = lowongan.tanggalMulai.split('T')[0];
+                document.getElementById('tanggalSelesai').value = lowongan.tanggalSelesai.split('T')[0];
+
+                document.getElementById('form-modal').classList.remove('hidden');
+            } catch (error) {
+                alert('Error loading lowongan');
+            }
+        }
+
+        async function deleteLowongan(id) {
+            if (!confirm('Yakin hapus lowongan ini?')) return;
+
+            try {
+                await fetch(`${API_URL}/lowongan/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                alert('Lowongan berhasil dihapus');
+                fetchLowongan();
+            } catch (error) {
+                alert('Error deleting lowongan');
+            }
+        }
+
+        fetchLowongan();
+    </script>
+</body>
+</html>
