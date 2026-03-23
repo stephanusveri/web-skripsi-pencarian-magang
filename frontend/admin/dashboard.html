@@ -5,13 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow">
+    <nav class="bg-white shadow fixed top-0 left-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold">Portal Admin</h1>
-            <div class="space-x-4">
+            <h1 class="text-xl font-bold truncate">Portal Admin</h1>
+            <!-- Desktop Nav -->
+            <div class="hidden md:flex items-center space-x-4 flex-wrap">
                 <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
                 <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
                 <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
@@ -19,39 +22,54 @@
                 <a href="history.html" class="text-blue-600 hover:underline">History</a>
                 <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
             </div>
+
+            <!-- Hamburger Button -->
+            <button id="hamburger-btn" class="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-gray-100 focus:outline-none transition-colors" aria-label="Toggle menu">
+                <i id="menu-icon" class="ri-menu-line text-2xl text-gray-700"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden-menu md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col space-y-3 absolute w-full shadow-lg">
+            <a href="dashboard.html" class="text-blue-600 hover:underline text-sm py-1">Dashboard</a>
+            <a href="perusahaan.html" class="text-blue-600 hover:underline text-sm py-1">Perusahaan</a>
+            <a href="mahasiswa.html" class="text-blue-600 hover:underline text-sm py-1">Mahasiswa</a>
+            <a href="lowongan.html" class="text-blue-600 hover:underline text-sm py-1">Lowongan</a>
+            <a href="history.html" class="text-blue-600 hover:underline text-sm py-1">History</a>
+            <button id="logout-btn-mobile" class="text-red-600 hover:underline text-sm text-left py-1">Logout</button>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <h2 class="text-2xl font-bold mb-6">Dashboard Admin</h2>
+    <div class="max-w-7xl mx-auto px-4 py-6 mt-16">
+        <h2 class="text-xl sm:text-2xl font-bold mb-5">Dashboard Admin</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-600 mb-2">Total Perusahaan</h3>
-                <p id="total-perusahaan" class="text-3xl font-bold text-blue-600">0</p>
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-xs sm:text-sm mb-1">Total Perusahaan</h3>
+                <p id="total-perusahaan" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-600 mb-2">Total Mahasiswa</h3>
-                <p id="total-mahasiswa" class="text-3xl font-bold text-blue-600">0</p>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-xs sm:text-sm mb-1">Total Mahasiswa</h3>
+                <p id="total-mahasiswa" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-600 mb-2">Total Lowongan</h3>
-                <p id="total-lowongan" class="text-3xl font-bold text-blue-600">0</p>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-xs sm:text-sm mb-1">Total Lowongan</h3>
+                <p id="total-lowongan" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-600 mb-2">Total Lamaran</h3>
-                <p id="total-lamaran" class="text-3xl font-bold text-blue-600">0</p>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-xs sm:text-sm mb-1">Total Lamaran</h3>
+                <p id="total-lamaran" class="text-2xl sm:text-3xl font-bold text-blue-600">0</p>
             </div>
         </div>
 
-        <!-- Chart & Recent Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-bold mb-4">Lowongan Terbaru</h3>
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2  gap-4 sm:gap-6">
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold mb-4 font-bold mb-4">Lowongan Terbaru</h3>
                 <div id="recent-lowongan"></div>
             </div>
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-xl font-bold mb-4">Lamaran Terbaru</h3>
+            <div class="bg-white rounded-lg shadow p-4  sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold mb-4">Lamaran Terbaru</h3>
                 <div id="recent-lamaran"></div>
             </div>
         </div>
@@ -59,6 +77,33 @@
     
     <script src="../js/common.js"></script>
     <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        let menuOpen = false;
+
+        hamburgerBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('hidden-menu');
+                mobileMenu.classList.add('show-menu');
+                menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+            } else {
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700'
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                menuOpen = false;
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+            }
+        });
+
         const user = initCommon('ADMIN');
 
         async function fetchDashboardData() {

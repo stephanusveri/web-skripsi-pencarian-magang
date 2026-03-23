@@ -1,3 +1,7 @@
+.nav{
+    position: fixed;
+}
+
 /* custom scrollbar */
 
 ::-webkit-scrollbar {
@@ -206,4 +210,27 @@
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Responsive */
+#mobile-menu {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+#mobile-menu.hidden-menu {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+#mobile-menu.show-menu {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#table-wrapper { display: none; }
+#peruasahaan-cards { display: flex; flex-direction: column; gap: 12px; }
+
+@media (min-width: 640px) {
+    #table-wrapper { display: block; }
+    #perusahaan-cards { display: none; }
 }

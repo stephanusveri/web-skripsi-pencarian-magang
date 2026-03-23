@@ -340,8 +340,39 @@ router.get('/lamaran', authenticate, authorize('PERUSAHAAN'), async (req, res) =
     }
 });
 
+// get lamaran by id
+router.get('/lamaran/:id', authenticate, authorize('PERUSAHAAN'), async (req, res) => {
+    try {
+        const perusahaan = await prisma.perusahaan.findUnique({
+            where: { userId: req.user.id }
+        });
+
+        const lamaran = await prisma.lamaran.findFirst({
+            where: {
+                id: req.params.id,
+                lowongan: {
+                    perusahaanId: perusahaan.id
+                }
+            },
+            include: {
+                mahasiswa: true,
+                lowongan: true
+            }
+        });
+
+        if (!lamaran) {
+            return res.status(404).json({ message: 'Lamaran tidak ditemukan' })
+        }
+
+        res.json(lamaran);
+    } catch (error) {
+        console.error('Error get lamaran detail:', error);
+        res.status(500).json({ message: 'Server error', error: error.message })
+    }
+});
+
 // update status lamaran
-router.patch('/lamaran/:id.status', authenticate, authorize('PERUSAHAAN'), async (req, res) => {
+router.patch('/lamaran/:id/status', authenticate, authorize('PERUSAHAAN'), async (req, res) => {
     try {
         const perusahaan = await prisma.perusahaan.findUnique({
             where: { userId: req.user.id }

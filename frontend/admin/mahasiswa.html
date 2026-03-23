@@ -5,13 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Mahasiswa</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow">
+    <nav id="main-nav" class="bg-white shadow fixed top-0 left-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold">Portal Admin</h1>
-            <div class="space-x-4">
+            <h1 class="text-xl font-bold truncate">Portal Admin</h1>
+            <div class="hidden md:flex items-center space-x-4 flex-wrap">
                 <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
                 <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
                 <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
@@ -19,43 +21,59 @@
                 <a href="history.html" class="text-blue-600 hover:underline">History</a>
                 <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
             </div>
+            <!-- Hamburger Button -->
+            <button id="hamburger-btn" class="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-gray-100 focus:outline-none transition-colors" aria-label="Toggle menu">
+                <i id="menu-icon" class="ri-menu-line text-2xl text-gray-700"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden-menu md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col space-y-3 absolute w-full shadow-lg">
+            <a href="dashboard.html" class="text-blue-600 hover:underline text-sm py-1">Dashboard</a>
+            <a href="perusahaan.html" class="text-blue-600 hover:underline text-sm py-1">Perusahaan</a>
+            <a href="mahasiswa.html" class="text-blue-600 hover:underline text-sm py-1">Mahasiswa</a>
+            <a href="lowongan.html" class="text-blue-600 hover:underline text-sm py-1">Lowongan</a>
+            <a href="history.html" class="text-blue-600 hover:underline text-sm py-1">History</a>
+            <button id="logout-btn-mobile" class="text-red-600 hover:underline text-sm text-left py-1">Logout</button>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Kelola Mahasiswa</h2>
-            <div class="flex gap-4">
-                <input type="text" id="search" placeholder="Cari mahasiswa..." class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <select name="" id="filter-jurusan" class="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="max-w-7xl mx-auto px-4 py-6 mt-16">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-5">
+            <h2 class="text-xl font-bold">Kelola Mahasiswa</h2>
+            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <input type="text" id="search" placeholder="Cari mahasiswa..." class="px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-60 text-sm">
+                <select id="filter-jurusan" class="px-3 py-1.5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-48 text-xs sm:text-sm">
                     <option value="">Semua Jurusan</option>
                 </select>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="min-w-full">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jurusan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Semester</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lamaran</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jurusan</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Semester</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lamaran</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="mahasiswa-table" class="divide-y divide-gray-200"></tbody>
             </table>
+            </div>
         </div>
     </div>
     <!-- Detail Modal -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div class="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 md:p-6">
             <div class="flex justify-between items-start mb-4">
                 <h3 class="text-2xl font-bold">Detail Mahasiswa</h3>
-                <button id="close-modal" class="text-gray-500 hover:text-gray-700">✕</button>
+                <button id="close-modal" class="text-xl font-bold text-gray-500 hover:text-gray-700">&times;</button>
             </div>
             
             <div id="modal-content"></div>
@@ -63,5 +81,239 @@
     </div>
 
     <script src="../js/common.js"></script>
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        let menuOpen = false;
+
+        hamburgerBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('hidden-menu');
+                mobileMenu.classList.add('show-menu');
+                menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+            } else {
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700'
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                menuOpen = false;
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+            }
+        });
+
+        const user = initCommon('ADMIN');
+        let allMahasiswa = [];
+        let allJurusan = new Set();
+
+        function showLoading() {
+            document.getElementById('mahasiswa-table').innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center">
+                        <div class="flex justify-center items-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('mahasiswa-table').innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-center text-red-600">
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        async function fetchMahasiswa() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_URL}/admin/mahasiswa`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const data = await response.json();
+                allMahasiswa = data;
+
+                console.log('Data mahasiswa:', allMahasiswa);
+
+                allMahasiswa.forEach(mhs => {
+                    if (mhs.jurusan) allJurusan.add(mhs.jurusan);
+                });
+
+                populateJurusanFilter();
+                displayMahasiswa(allMahasiswa);
+            } catch (error) {   
+                console.error('Error:', error);
+                showError('Gagal memuat data mahasiswa')
+            }
+        }
+
+        function populateJurusanFilter() {
+            const select = document.getElementById('filter-jurusan');
+            allJurusan.forEach(jurusan => {
+                const option = document.createElement('option');
+                option.value = jurusan;
+                option.textContent = jurusan;
+                select.appendChild(option);
+            });
+        }
+
+        function displayMahasiswa(mahasiswaList) {
+            const tbody = document.getElementById('mahasiswa-table');
+            if (!mahasiswaList || mahasiswaList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            Tidak ada data mahasiswa
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = mahasiswaList.map(mhs => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-3 md:px-6 py-4 text-sm break-words">${mhs.nim || '-'}</td>
+                    <td class="px-3 md:px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${mhs.nama || '-'}</div>
+                    </td>
+                    <td class="px-3 md:px-6 py-4 text-sm text-gray-500 break-words">${mhs.jurusan || '-'}</td>
+                    <td class="px-3 md:px-6 py-4 text-sm text-gray-500 break-words">${mhs.semester || '-'}</td>
+                    <td class="px-3 md:px-6 py-4 text-sm text-gray-500 break-words">${mhs.user?.email || '-'}</td>
+                    <td class="px-3 md:px-6 py-4 text-sm text-gray-500 break-words">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                            ${mhs._count?.lamaran || 0} lamaran
+                        </span>
+                    </td>
+                    <td class="px-3 md:px-6 py-4 text-sm break-words">
+                        <button onclick="viewDetail('${mhs.id}')" 
+                            class="text-blue-600 hover:text-blue-900 mr-3">
+                            Detail
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('search').addEventListener('input', () => {
+            filterMahasiswa();
+        });
+
+        document.getElementById('filter-jurusan').addEventListener('change', () => {
+            filterMahasiswa();
+        });
+
+        function filterMahasiswa() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const jurusanFilter = document.getElementById('filter-jurusan').value;
+
+            const filtered = allMahasiswa.filter(mhs => {
+                const matchSearch = !searchTerm || 
+                    (mhs.nama?.toLowerCase().includes(searchTerm)) ||
+                    (mhs.nim?.toLowerCase().includes(searchTerm)) ||
+                    (mhs.user?.email?.toLowerCase().includes(searchTerm));
+
+                const matchJurusan = !jurusanFilter || mhs.jurusan === jurusanFilter;
+
+                return matchSearch && matchJurusan;
+            });
+
+            displayMahasiswa(filtered);
+        }
+
+        // View detail
+        async function viewDetail(id) {
+            try {
+                const mahasiswa = await apiGet(`/admin/mahasiswa/${id}`);
+                console.log('Detail mahasiswa:', mahasiswa);
+
+                const modalContent = document.getElementById('modal-content');
+                modalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">NIM</label>
+                                <p class="text-gray-900">${mahasiswa.nim || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Nama Lengkap</label>
+                                <p class="text-gray-900">${mahasiswa.nama || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Email</label>
+                                <p class="text-gray-900">${mahasiswa.user?.email || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Jurusan</label>
+                                <p class="text-gray-900">${mahasiswa.jurusan || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Semester</label>
+                                <p class="text-gray-900">${mahasiswa.semester || '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Total Lamaran</label>
+                                <p class="text-gray-900">${mahasiswa._count?.lamaran || 0}</p>
+                            </div>
+                        </div>
+
+                        ${mahasiswa.lamaran && mahasiswa.lamaran.length > 0 ? `
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="font-semibold mb-3">Riwayat Lamaran</h4>
+                                <div class="space-y-2">
+                                    ${mahasiswa.lamaran.map(l => `
+                                        <div class="p-3 bg-gray-50 rounded">
+                                            <p class="font-medium">${l.lowongan?.judul || 'N/A'}</p>
+                                            <p class="text-sm text-gray-600">${l.lowongan?.perusahaan?.namaPerusahaan || 'N/A'}</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                Status: <span class="px-2 py-1 rounded text-xs
+                                                    ${l.status === 'DITERIMA' ? 'bg-green-100 text-green-700' : 
+                                                    l.status === 'DITOLAK' ? 'bg-red-100 text-red-700' : 
+                                                    'bg-yellow-100 text-yellow-700'}">
+                                                    ${l.status}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                document.getElementById('detail-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Gagal memuat detail mahasiswa');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        document.getElementById('close-modal').addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        document.getElementById('detail-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'detail-modal') {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        fetchMahasiswa();
+    </script>
 </body>
 </html>

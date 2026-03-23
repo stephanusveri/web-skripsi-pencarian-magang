@@ -5,13 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Perusahaan</title>
+    <link rel="stylesheet" href="../assets/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet"/>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow">
+    <nav id="main-nav" class="bg-white shadow fixed top-0 left-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold">Portal Admin</h1>
-            <div class="space-x-4">
+            <h1 class="text-xl font-bold truncate">Portal Admin</h1>
+            <div class="hidden md:flex items-center space-x-4 flex-wrap">
                 <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
                 <a href="perusahaan.html" class="text-blue-600 hover:underline">Perusahaan</a>
                 <a href="mahasiswa.html" class="text-blue-600 hover:underline">Mahasiswa</a>
@@ -19,18 +23,34 @@
                 <a href="history.html" class="text-blue-600 hover:underline">History</a>
                 <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
             </div>
+
+            <!-- Hamburger Button -->
+            <button id="hamburger-btn" class="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-gray-100 focus:outline-none transition-colors" aria-label="Toggle menu">
+                <i id="menu-icon" class="ri-menu-line text-2xl text-gray-700"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden-menu md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col space-y-3 absolute w-full shadow-lg">
+            <a href="dashboard.html" class="text-blue-600 hover:underline text-sm py-1">Dashboard</a>
+            <a href="perusahaan.html" class="text-blue-600 hover:underline text-sm py-1">Perusahaan</a>
+            <a href="mahasiswa.html" class="text-blue-600 hover:underline text-sm py-1">Mahasiswa</a>
+            <a href="lowongan.html" class="text-blue-600 hover:underline text-sm py-1">Lowongan</a>
+            <a href="history.html" class="text-blue-600 hover:underline text-sm py-1">History</a>
+            <button id="logout-btn-mobile" class="text-red-600 hover:underline text-sm text-left py-1">Logout</button>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Kelola Perusahaan</h2>
-            <button id="add-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+    <div class="max-w-7xl mx-auto px-4 py-6 mt-16">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-xl font-bold">Kelola Perusahaan</h2>
+            <button id="add-btn" class="bg-blue-500 text-white px-3 py-2 text-md sm:px-3 sm:py-2 sm:text-md rounded hover:bg-blue-600 whitespace-nowrap">
                 + Tambah Perusahaan
             </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- TABLE: desktop only -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-gray-100">
                     <tr>
@@ -44,6 +64,8 @@
                 <tbody id="perusahaan-table" class="divide-y divide-gray-200"></tbody>
             </table>
         </div>
+
+        <div id="perusahaan-cards"></div>
     </div>
 
     <!-- Modal Form
@@ -92,45 +114,45 @@
 
     <!-- Modal form tambah/edit -->
     <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 overflow-y-auto z-50">
-        <div class="bg-white rounded-lg max-w-2xl w-full p-6 my-8">
+        <div class="bg-white rounded-lg max-w-2xl w-full p-5 sm:p-6 my-8">
             <div class="flex justify-between items-center mb-4">
-                <h3 id="form-title" class="text-2xl font-bold">Tambah Perusahaan</h3>
-                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                <h3 id="form-title" class="text-xl sm:text-2xl font-bold">Tambah Perusahaan</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
 
             <form id="perusahaan-form">
                 <input type="hidden" id="perusahaan-id">
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Email *</label>
-                    <input type="email" id="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-gray-700 text-sm mb-1">Email *</label>
+                    <input type="email" id="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
 
                 <div class="mb-4" id="password-field">
-                    <label class="block text-gray-700 mb-2">Password <span id="password-hint" class="text-sm text-gray-500">(Kosongkan jika tidak ingin mengubah)</span></label>
-                    <input type="password" id="password" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-gray-700 text-sm mb-1">Password *<span id="password-hint" class="text-xs text-gray-400">(Kosongkan jika tidak ingin mengubah)</span></label>
+                    <input type="password" id="password" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Nama Perusahaan *</label>
-                    <input type="text" id="namaPerusahaan" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-gray-700 text-sm mb-1">Nama Perusahaan *</label>
+                    <input type="text" id="namaPerusahaan" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Alamat *</label>
-                    <textarea id="alamat" rows="3" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label class="block text-gray-700 text-sm mb-1">Alamat *</label>
+                    <textarea id="alamat" rows="3" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"></textarea>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Telepon *</label>
-                    <input type="tel" id="telepon" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-gray-700 text-sm mb-1">Telepon *</label>
+                    <input type="tel" id="telepon" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div class="mb-6">
-                    <label class="block text-gray-700 mb-2">Website</label>
-                    <input type="url" id="website" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-gray-700 text-sm mb-1">Website</label>
+                    <input type="url" id="website" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
 
-                <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                <button class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 text-sm">
                     Simpan
                 </button>
             </form>
@@ -139,13 +161,13 @@
 
     <!-- Modal Detail Perusahaan -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center p-4 overflow-y-auto z-50">
-        <div class="bg-white rounded-lg max-w-3xl w-full p-6 my-8">
+        <div class="bg-white rounded-lg max-w-3xl w-full p-5 sm:p-6 my-8">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Detail Perusahaan</h3>
-                <button id="close-detail-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                <h3 class="text-xl sm:text-2xl font-bold">Detail Perusahaan</h3>
+                <button id="close-detail-modal" class="text-3xl font-bold text-gray-500 hover:text-gray-700 text-3xl leading-none">&times;</button>
             </div>
 
-            <div id="detail-content" class="space-y-6">
+            <div id="detail-content" class="space-y-4">
                 <!-- loading state -->
                 <div class="text-center py-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
@@ -157,6 +179,33 @@
 
     <script src="../js/common.js"></script>
     <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        let menuOpen = false;
+
+        hamburgerBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('hidden-menu');
+                mobileMenu.classList.add('show-menu');
+                menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+            } else {
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700'
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                menuOpen = false;
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+            }
+        });
+
         const user = initCommon('ADMIN');
         let isEditMode = false;
         let currentEditId = null;
@@ -196,7 +245,6 @@
             } catch (error) {
                 document.getElementById('detail-content').innerHTML = `
                     <div class="text-center py-8">
-                        <div class="text-red-500 text-5xl mb-4">⚠️</div>
                         <p class="text-red-600">Gagal memuat data perusahaan</p>
                         <p class="text-gray-500 text-sm mt-2">${error.message}</p>
                     </div>
@@ -221,7 +269,6 @@
                 <!-- Informasi Kontak -->
                 <div class="border rounded-lg p-6">
                     <h5 class="text-lg font-semibold mb-4 flex items-center">
-                        <span class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📧</span>
                         Informasi Kontak
                     </h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -245,7 +292,6 @@
                 <!-- Alamat -->
                 <div class="border rounded-lg p-6">
                     <h5 class="text-lg font-semibold mb-4 flex items-center">
-                        <span class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📍</span>
                         Alamat
                     </h5>
                     <p class="text-gray-700">${data.alamat}</p>
@@ -254,7 +300,6 @@
                 <!-- Statistik -->
                 <div class="border rounded-lg p-6">
                     <h5 class="text-lg font-semibold mb-4 flex items-center">
-                        <span class="bg-purple-100 text-purple-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">📊</span>
                         Statistik
                     </h5>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -281,7 +326,6 @@
                 ${data.lowongan && data.lowongan.length > 0 ? `
                     <div class="border rounded-lg p-6">
                         <h5 class="text-lg font-semibold mb-4 flex items-center">
-                            <span class="bg-orange-100 text-orange-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">💼</span>
                             Lowongan Terbaru
                         </h5>
                         <div class="space-y-3">
@@ -308,11 +352,11 @@
                 <div class="flex gap-3">
                     <button onclick="editPerusahaan('${data.id}')" 
                         class="flex-1 bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">
-                        ✏️ Edit Data
+                        Edit Data
                     </button>
                     <button onclick="deletePerusahaan('${data.id}')" 
                         class="flex-1 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
-                        🗑️ Hapus Perusahaan
+                        Hapus Perusahaan
                     </button>
                 </div>
             `;
@@ -342,7 +386,7 @@
             `).join('');
         }
 
-        async function  editPerusahaan(id) {
+        async function editPerusahaan(id) {
             // close modal detail 
             document.getElementById('detail-modal').classList.add('hidden');
 
@@ -399,6 +443,14 @@
             document.getElementById('detail-modal').classList.add('hidden');
         });
 
+        function swalCountdown(options, seconds = 3) {
+            return Swal.fire({
+                ...options,
+                timer: seconds * 1000,
+                timerProgressBar: true,
+            });
+        }
+
         document.getElementById('perusahaan-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -422,7 +474,7 @@
                 data.role = 'PERUSAHAAN';
             }
 
-           try {
+            try {
                 const url = isEditMode 
                     ? `${API_URL}/admin/perusahaan/${currentEditId}`
                     : `${API_URL}/admin/perusahaan`;
@@ -443,16 +495,44 @@
                     throw new Error(errorData.message || 'Gagal menyimpan data');
                 }
 
-                alert(isEditMode ? 'Perusahaan berhasil diupdate!' : 'Perusahaan berhasil ditambahkan!');
+                // alert(isEditMode ? 'Perusahaan berhasil diupdate!' : 'Perusahaan berhasil ditambahkan!');
+
+                await swalCountdown({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: isEditMode ? 'Perusahaan berhasil diupdate' : 'Perusahaan berhasil ditambahkan',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                }, 3);
                 document.getElementById('form-modal').classList.add('hidden');
                 fetchPerusahaan();
             } catch (error) {
-                alert('Error: ' + error.message);
+                // alert('Error: ' + error.message);
+                Swal.swalCountdown({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: error.message,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                }, 4);
             }
         });
 
         async function deletePerusahaan(id) {
-            if (!confirm('Yakin hapus perusahaan ini? Semua data lowongan dan lamaran terkait juga akan terhapus.')) return;
+            // if (!confirm('Yakin hapus perusahaan ini? Semua data lowongan dan lamaran terkait juga akan terhapus.')) return;
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Konfirmasi Hapus',
+                text: 'Yakin hapus perusahaan ini? Semua data lowongan dan lamaran terkait juga akan terhapus.',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal'
+            });
+
+
+            if (!result.isConfirmed) return;
 
             try {
                 const response = await fetch(`${API_URL}/admin/perusahaan/${id}`, {
@@ -462,11 +542,26 @@
 
                 if (!response.ok) throw new Error('Gagal menghapus perusahaan');
 
-                alert('Perusahaan berhasil dihapus');
+                // alert('Perusahaan berhasil dihapus');
+                await swalCountdown({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Perusahaan berhasil dihapus',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                }, 3);
+
                 document.getElementById('detail-modal').classList.add('hidden');
                 fetchPerusahaan();
             } catch (error) {
-                alert('Error: ' + error.message);
+                // alert('Error: ' + error.message);
+                await swalCountdown({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: error.message,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                }, 4)
             }
         }
 

@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cari Lowongan Magang</title>
+    <link rel="stylesheet" href="../assets/css/sweetalert2.min.css">
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow">
+    <nav class="bg-white shadow fixed top-0 left-0 w-full">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold">Portal Mahasiswa</h1>
             <div class="space-x-4">
@@ -22,7 +25,7 @@
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 py-8 mt-20">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2 font-bold">Lowongan Magang Tersedia</h2>
             <div class="flex gap-4">
@@ -70,12 +73,12 @@
                         <input type="hidden" id="lowongan-id">
 
                         <!-- upload cv -->
-                        <div class="mb-4">
+                        <div class="mb-4" id="cv-section">
                             <label class="block text-gray-700 font-medium mb-2">
                                 CV (PDF) *
                             </label>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
-                                <input type="file" id="cv-file" accept=".pdf" required class="hidden" onchange="handleFileSelect(this)">
+                            <div id="cv-dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                                <input type="file" id="cv-file" accept=".pdf" class="hidden" onchange="handleFileSelect(this)">
                                 <label for="cv-file" class="cursor-pointer">
                                     <div id="cv-upload-area">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -100,20 +103,29 @@
                                 </label>
                             </div>
                             <p class="text-xs text-gray-500 mt-1">
-                                💡 Tips: Gunakan Google Drive, Dropbox, atau OneDrive untuk upload CV, lalu paste link-nya
+                                Tips: Gunakan Google Drive, Dropbox, atau OneDrive untuk upload CV, lalu paste link-nya
                             </p>
                         </div>
 
                         <!-- link cv -->
-                        <div class="mb-4">
+                        <div class="mb-2">
                             <label class="block text-gray-700 font-medium mb-2">
                                 Atau Link CV *
                             </label>
                             <input type="url" id="cv-link" placeholder="https://drive.google.com/file/d/..." 
-                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                oninput="clearCvError()">
                             <p class="text-xs text-gray-500 mt-1">
                                 Upload CV ke cloud storage dan pastikan akses dibuat "Anyone with link can view"
                             </p>
+                        </div>
+
+                        <!-- Pesan error CV inline -->
+                        <div id="cv-error-msg" class="hidden mb-3 flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-3">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            <span>Harap upload CV file <strong>atau</strong> masukkan link CV terlebih dahulu.</span>
                         </div>
 
                         <div class="border-t border-b py-3 mb-4">
@@ -152,7 +164,7 @@
                             </p>
                         </div>
 
-                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium">
+                        <button type="submit" id="submit-btn" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-medium">
                             Kirim Lamaran
                         </button>
                     </form>
@@ -163,36 +175,64 @@
 
     <script src="../js/common.js"></script>
     <script>
-        // Initialize
         const user = initCommon('MAHASISWA');
         let allLowongan = [];
         let selectedFile = null;
+        let isSubmitting = false;
 
-        // handle file selection
+        // =============================================
+        // HELPER: Error CV inline
+        // =============================================
+        function showCvError() {
+            document.getElementById('cv-dropzone').classList.remove('border-gray-300');
+            document.getElementById('cv-dropzone').classList.add('border-red-400', 'bg-red-50');
+            document.getElementById('cv-link').classList.add('border-red-400');
+            document.getElementById('cv-error-msg').classList.remove('hidden');
+            document.getElementById('cv-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function clearCvError() {
+            document.getElementById('cv-dropzone').classList.add('border-gray-300');
+            document.getElementById('cv-dropzone').classList.remove('border-red-400', 'bg-red-50');
+            document.getElementById('cv-link').classList.remove('border-red-400');
+            document.getElementById('cv-error-msg').classList.add('hidden');
+        }
+
+        // =============================================
+        // Handle file selection
+        // =============================================
         function handleFileSelect(input) {
             const file = input.files[0];
-            if (file) {
-                // validasi tipe file
-                if (file.type !== 'application/pdf') {
-                    alert('Hanya file PDF yang diperbolehakan!');
-                    input.value = '';
-                    return;
-                }
+            if (!file) return;
 
-                // validasi size file (max 5mb)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Ukuran file maksimal 5MB!');
-                    input.value = '';
-                    return;
-                }
-
-                selectedFile = file;
-                document.getElementById('cv-upload-area').classList.add('hidden');
-                document.getElementById('cv-file-info').classList.remove('hidden');
-                document.getElementById('cv-file-name').textContent = file.name;
-
-                document.getElementById('cv-link').value = '';
+            if (file.type !== 'application/pdf') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format Tidak Valid',
+                    text: 'Hanya file PDF yang diperbolehkan!',
+                    confirmButtonColor: '#3b82f6'
+                });
+                input.value = '';
+                return;
             }
+
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Terlalu Besar',
+                    text: 'Ukuran file maksimal 5MB!',
+                    confirmButtonColor: '#3b82f6'
+                });
+                input.value = '';
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('cv-upload-area').classList.add('hidden');
+            document.getElementById('cv-file-info').classList.remove('hidden');
+            document.getElementById('cv-file-name').textContent = file.name;
+            document.getElementById('cv-link').value = '';
+            clearCvError();
         }
 
         function clearFile() {
@@ -201,12 +241,14 @@
             document.getElementById('cv-upload-area').classList.remove('hidden');
             document.getElementById('cv-file-info').classList.add('hidden');
         }
-        
-        // Fetch lowongan
+
+        // =============================================
+        // Fetch & display lowongan
+        // =============================================
         async function fetchLowongan() {
             showLoading('lowongan-list');
             try {
-                const response = await fetch (`${API_URL}/lowongan`, {
+                const response = await fetch(`${API_URL}/lowongan`, {
                     headers: { 'Authorization': `Bearer ${getToken()}` }
                 });
                 const data = await response.json();
@@ -219,12 +261,10 @@
 
         function displayLowongan(lowongan) {
             const container = document.getElementById('lowongan-list');
-            
             if (lowongan.length === 0) {
                 container.innerHTML = '<p class="col-span-full text-center text-gray-500">Tidak ada lowongan</p>';
                 return;
             }
-
             container.innerHTML = lowongan.map(item => `
                 <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition cursor-pointer"
                     onclick="showDetail('${item.id}')">
@@ -241,35 +281,66 @@
             `).join('');
         }
 
+        // =============================================
+        // Show detail modal
+        // =============================================
         async function showDetail(id) {
             try {
-                const lowongan = await apiGet(`/lowongan/${id}`);
-                
+                const response = await fetch(`${API_URL}/lowongan/${id}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                const lowongan = await response.json();
+
                 document.getElementById('lowongan-id').value = id;
                 document.getElementById('modal-title').textContent = lowongan.judul;
                 document.getElementById('modal-content').innerHTML = `
                     <div class="space-y-4">
-                        <div>
-                            <h4 class="font-semibold">Perusahaan</h4>
-                            <p>${lowongan.perusahaan.namaPerusahaan}</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-900">${lowongan.perusahaan.namaPerusahaan}</h4>
+                            <p class="text-sm text-blue-700 mt-1">${lowongan.lokasi}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold">Deskripsi</h4>
-                            <p>${lowongan.deskripsi}</p>
+                            <h4 class="font-semibold mb-2">Deskripsi</h4>
+                            <p class="text-gray-700">${lowongan.deskripsi}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold">Persyaratan</h4>
-                            <p class="whitespace-pre-wrap">${lowongan.persyaratan}</p>
+                            <h4 class="font-semibold mb-2">Persyaratan</h4>
+                            <p class="text-gray-700 whitespace-pre-wrap">${lowongan.persyaratan}</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><strong>Lokasi:</strong> ${lowongan.lokasi}</div>
-                            <div><strong>Durasi:</strong> ${lowongan.durasi}</div>
-                            <div><strong>Kuota:</strong> ${lowongan.kuota} orang</div>
-                            <div><strong>Status:</strong> ${lowongan.status}</div>
+                        <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                            <div>
+                                <span class="text-sm text-gray-600">Durasi</span>
+                                <p class="font-medium">${lowongan.durasi}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Kuota</span>
+                                <p class="font-medium">${lowongan.kuota} orang</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Periode Lamaran</span>
+                                <p class="font-medium text-sm">
+                                    ${new Date(lowongan.tanggalMulai).toLocaleDateString('id-ID')} - 
+                                    ${new Date(lowongan.tanggalSelesai).toLocaleDateString('id-ID')}
+                                </p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Status</span>
+                                <p class="font-medium">
+                                    <span class="px-2 py-1 rounded text-xs ${lowongan.status === 'BUKA' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                        ${lowongan.status}
+                                    </span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 `;
-                
+
+                document.getElementById('apply-form').reset();
+                clearFile();
+                clearCvError();
+                isSubmitting = false;
+                document.getElementById('submit-btn').disabled = false;
+
                 document.getElementById('detail-modal').classList.remove('hidden');
             } catch (error) {
                 showToast('Gagal memuat detail lowongan', 'error');
@@ -280,44 +351,164 @@
             document.getElementById('detail-modal').classList.add('hidden');
         });
 
+        // =============================================
+        // SUBMIT FORM LAMARAN
+        // =============================================
         document.getElementById('apply-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const data = {
-                lowonganId: document.getElementById('lowongan-id').value,
-                suratLamaran: document.getElementById('surat-lamaran').value,
-                catatan: document.getElementById('catatan').value
-            };
-            
+
+            if (isSubmitting) return;
+
+            const cvFile = selectedFile;
+            const cvLink = document.getElementById('cv-link').value.trim();
+
+            // STEP 1 — Validasi CV
+            if (!cvFile && !cvLink) {
+                showCvError();
+                await Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap',
+                    html: `
+                        <p class="text-gray-600 mb-3">Harap lengkapi data lamaran terlebih dahulu.</p>
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-left">
+                            <p class="text-sm font-semibold text-red-700 mb-1">Dokumen wajib yang belum diisi:</p>
+                            <ul class="text-sm text-red-600 list-disc list-inside">
+                                <li><strong>CV</strong> — Upload file PDF atau masukkan link CV</li>
+                            </ul>
+                        </div>
+                    `,
+                    confirmButtonText: 'Lengkapi Sekarang',
+                    confirmButtonColor: '#3b82f6',
+                    allowOutsideClick: false
+                });
+                return;
+            }
+
+            clearCvError();
+
+            // STEP 2 — Konfirmasi
+            const konfirmasi = await Swal.fire({
+                icon: 'question',
+                title: 'Kirim Lamaran?',
+                text: 'Pastikan semua data lamaran Anda sudah benar sebelum dikirim.',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Kirim!',
+                cancelButtonText: 'Cek Lagi',
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+
+            if (!konfirmasi.isConfirmed) return;
+
+            // STEP 3 — Loading
+            isSubmitting = true;
+            document.getElementById('submit-btn').disabled = true;
+
+            Swal.fire({
+                title: 'Mengirim Lamaran...',
+                text: 'Mohon tunggu sebentar.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // STEP 4 — Kirim ke server
+            const formData = new FormData();
+            formData.append('lowonganId', document.getElementById('lowongan-id').value);
+            if (cvFile) formData.append('cv', cvFile);
+            if (cvLink) formData.append('cvLink', cvLink);
+
+            const portfolioLink = document.getElementById('portfolio-link').value;
+            const linkedinLink  = document.getElementById('linkedin-link').value;
+            const resumeLink    = document.getElementById('resume-link').value;
+            if (portfolioLink) formData.append('portfolioLink', portfolioLink);
+            if (linkedinLink)  formData.append('linkedinLink', linkedinLink);
+            if (resumeLink)    formData.append('resumeLink', resumeLink);
+
             try {
-                await apiPost('/mahasiswa/lamaran', data);
-                showToast('Lamaran berhasil dikirim!', 'success');
-                document.getElementById('detail-modal').classList.add('hidden');
-                document.getElementById('apply-form').reset();
+                const response = await fetch(`${API_URL}/mahasiswa/lamaran`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${getToken()}` },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || 'Gagal mengirim lamaran');
+                }
+
+                // STEP 5 — Sukses: dikunci dengan Promise, tidak bisa hilang sampai user klik OK
+                await new Promise((resolve) => {
+                    let countdown = 5;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Lamaran Berhasil Dikirim!',
+                        text: 'Lamaran Anda telah berhasil dikirim. Pantau statusnya di menu "Lamaran Saya".',
+                        confirmButtonText: `OK (${countdown})`,
+                        confirmButtonColor: '#3b82f6',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: true,
+                        didOpen: () => {
+                            const btn = Swal.getConfirmButton();
+                            btn.disabled = true;
+                            const timer = setInterval(() => {
+                                countdown--;
+                                btn.textContent = countdown > 0 ? `OK (${countdown})` : 'OK';
+                                if (countdown <= 0) {
+                                    clearInterval(timer);
+                                    btn.disabled = false;
+                                }
+                            }, 1000);
+                        }
+                    }).then(() => resolve());
+                });
+
+                // Jalankan SETELAH user klik OK
+                // document.getElementById('detail-modal').classList.add('hidden');
+                // document.getElementById('apply-form').reset();
+                // clearFile();
+                // clearCvError();
+
             } catch (error) {
-                showToast(error.message, 'error');
+                // Alert error juga dikunci dengan Promise
+                await new Promise((resolve) => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Mengirim Lamaran',
+                        text: error.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#ef4444',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    }).then(() => resolve());
+                });
+            } finally {
+                isSubmitting = false;
+                document.getElementById('submit-btn').disabled = false;
             }
         });
 
+        // =============================================
         // Search & Filter
+        // =============================================
         document.getElementById('search').addEventListener('input', filterLowongan);
         document.getElementById('filter-status').addEventListener('change', filterLowongan);
 
         function filterLowongan() {
             const search = document.getElementById('search').value.toLowerCase();
             const status = document.getElementById('filter-status').value;
-            
             const filtered = allLowongan.filter(item => {
-                const matchSearch = item.judul.toLowerCase().includes(search) || 
-                                   item.perusahaan.namaPerusahaan.toLowerCase().includes(search);
+                const matchSearch = item.judul.toLowerCase().includes(search) ||
+                                    item.perusahaan.namaPerusahaan.toLowerCase().includes(search);
                 const matchStatus = !status || item.status === status;
                 return matchSearch && matchStatus;
             });
-            
             displayLowongan(filtered);
         }
 
-        // Init
         fetchLowongan();
     </script>
 </body>

@@ -105,13 +105,13 @@ router.post('/login', async (req, res) => {
         });
 
         if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Email Belum Terdaftar' });
         }
 
         // check password
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            return res.status(401).json({ message: ' Invalid credentials ' });
+            return res.status(401).json({ message: ' Password Salah ' });
         }
 
         // generate token

@@ -1,5 +1,6 @@
 // common.js
 const API_URL = 'http://localhost:5000/api';
+// const API_URL = "https://f2g25jj2-5000.asse.devtunnels.ms/api"; //publik
 
 // ========================================
 // AUTH HELPERS
@@ -25,7 +26,7 @@ function checkAuth(requiredRole = null) {
     }
 
     if (requiredRole && user.role !== requiredRole) {
-        alert('Anda tidak memiliki akses ke halaman ini');
+        console.warn('Akses ditolak: role tidak sesuai');
         logout();
         return null;
     }
@@ -173,45 +174,45 @@ function showLoading(elementId) {
 /**
  * Show error message
  */
-function showError(elementId, message) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.innerHTML = `
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                <p>${message}</p>
-            </div>
-        `;
-    }
-}
+// function showError(elementId, message) {
+//     const element = document.getElementById(elementId);
+//     if (element) {
+//         element.innerHTML = `
+//             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+//                 <p>${message}</p>
+//             </div>
+//         `;
+//     }
+// }
 
 /**
  * Show success toast
  */
-function showToast(message, type = 'success') {
-    const bgColor = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
-    }[type] || 'bg-gray-500';
+// function showToast(message, type = 'success') {
+//     const bgColor = {
+//         success: 'bg-green-500',
+//         error: 'bg-red-500',
+//         warning: 'bg-yellow-500',
+//         info: 'bg-blue-500'
+//     }[type] || 'bg-gray-500';
 
-    const toast = document.createElement('div');
-    toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50`;
-    toast.textContent = message;
+//     const toast = document.createElement('div');
+//     toast.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50`;
+//     toast.textContent = message;
 
-    document.body.appendChild(toast);
+//     document.body.appendChild(toast);
 
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
+//     setTimeout(() => {
+//         toast.remove();
+//     }, 3000);
+// }
 
 /**
  * Confirm dialog
  */
-function confirmDialog(message) {
-    return confirm(message);
-}
+// function confirmDialog(message) {
+//     return confirm(message);
+// }
 
 // ========================================
 // FORMAT HELPERS
@@ -303,3 +304,71 @@ function initCommon(requiredRole = null) {
 
     return user;
 }
+
+// function initNavbar() {
+//     const nav = document.getElementById('main-nav');
+//     if (!nav) return;
+
+//     const currentPage = window.location.pathname.split('/').pop();
+
+//     const linkClass = (href) => href === currentPage ? 'text-blue-800 font-semibold underline text-sm' : 'text-blue-600 hover:underline text-sm';
+
+//     const desktopLinks = NAV_LINKS.map(({ href, label }) => `<a href="${href}" class="${linkClass(href)}">${label}</a>`).join('');
+
+//     const mobileLinks = NAV_LINKS.map(({ href, label }) => `<a href="${href}" class="${linkClass(href)} py-1 block">${label}</a>`).join('');
+
+
+//     nav.innerHTML = ` <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+//             <h1 class="text-lg font-bold truncate">Portal Admin</h1>
+
+//             <!-- Desktop links -->
+//             <div class="hidden md:flex items-center space-x-4 flex-wrap">
+//                 ${desktopLinks}
+//                 <button id="logout-btn" class="text-red-600 hover:underline text-sm">Logout</button>
+//             </div>
+
+//             <!-- Hamburger (mobile) -->
+//             <button id="hamburger-btn"
+//                 class="md:hidden flex items-center justify-center w-9 h-9 rounded-lg hover:bg-gray-100 focus:outline-none transition-colors"
+//                 aria-label="Toggle menu">
+//                 <i id="menu-icon" class="ri-menu-line text-2xl text-gray-700"></i>
+//             </button>
+//         </div>
+
+//         <!-- Mobile dropdown -->
+//         <div id="mobile-menu"
+//             class="hidden-menu md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col space-y-1 absolute w-full shadow-lg">
+//             ${mobileLinks}
+//             <button id="logout-btn-mobile" class="text-red-600 hover:underline text-sm text-left py-1">Logout</button>
+//         </div>
+//     `;
+
+//     const hamburgerBtn = document.getElementById('hamburger-btn');
+//     const mobileMenu = document.getElementById('mobile-menu');
+//     const menuIcon = document.getElementById('menu-icon');
+//     let menuOpen = false;
+
+//     function openMenu() {
+//         menuOpen = true;
+//         mobileMenu.classList.replace('hidden-menu', 'show-menu');
+//         menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+//     }
+
+//     function closeMenu() {
+//         menuOpen = false;
+//         mobileMenu.classList.replace('show-menu', 'hidden-menu');
+//         menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+//     }
+
+//     hamburgerBtn.addEventListener('click', (e) => {
+//         e.stopPropagation();
+//         menuOpen ? closeMenu() : openMenu();
+//     });
+
+//     document.addEventListener('click', (e) => {
+//         if (menuOpen && !mobileMenu.contains(e.target)) closeMenu();
+//     });
+
+//     document.getElementById('logout-btn')?.addEventListener('click', logout);
+//     document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
+// }

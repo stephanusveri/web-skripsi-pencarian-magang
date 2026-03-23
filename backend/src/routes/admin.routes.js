@@ -286,6 +286,49 @@ router.get('/mahasiswa', authenticate, authorize('ADMIN'), async (req, res) => {
     }
 });
 
+
+// get detail mahasiswa
+router.get('/mahasiswa/:id', authenticate, authorize('ADMIN'), async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const mahasiswa = await prisma.mahasiswa.findUnique({
+            where: { id },
+            include: {
+                user: {
+                    select: {
+                        email: true,
+                        role: true
+                    }
+                },
+                lamaran: {
+                    include: {
+                        lowongan: {
+                            include: {
+                                perusahaan: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        tanggalLamar: 'desc'
+                    }
+                },
+                _count: {
+                    select: { lamaran: true }
+                }
+            }
+        });
+
+        if (!mahasiswa) {
+            return res.status(404).json({ message: 'Mahasiswa tidak ditemukan' });
+        }
+
+        res.json(mahasiswa);
+    } catch (error) {
+        console.error('Error get mahasiswa detail:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+})
 // ========================================
 // LAMARAN ROUTES
 // ========================================
@@ -354,7 +397,7 @@ router.get('/history/:id', authenticate, authorize('ADMIN'), async (req, res) =>
 // Add history magang
 router.post('/history', authenticate, authorize('ADMIN'), async (req, res) => {
     try {
-        const { namaMahasiswa, nimMahasiswa, jurusanMahasiswa, namaPerusahaan, posisiMagang, websitePerusahaan, tanggalMulai, tanggalSelesai, nilaiAkhir, catatan } = req.body;
+        const { namaMahasiswa, nimMahasiswa, jurusanMahasiswa, namaPerusahaan, posisiMagang, websitePerusahaan, tanggalMulai, tanggalSelesai, sistemKerja, catatan } = req.body;
 
         const history = await prisma.historyMagang.create({
             data: {
@@ -366,7 +409,7 @@ router.post('/history', authenticate, authorize('ADMIN'), async (req, res) => {
                 websitePerusahaan,
                 tanggalMulai: new Date(tanggalMulai),
                 tanggalSelesai: new Date(tanggalSelesai),
-                nilaiAkhir: nilaiAkhir ? parseFloat(nilaiAkhir) : null,
+                sistemKerja,
                 catatan,
                 adminId: req.user.admin.id
             }
@@ -390,7 +433,7 @@ router.put('/history/:id', authenticate, authorize('ADMIN'), async (req, res) =>
             websitePerusahaan,
             tanggalMulai,
             tanggalSelesai,
-            nilaiAkhir,
+            sistemKerja,
             catatan
         } = req.body;
 
@@ -411,8 +454,8 @@ router.put('/history/:id', authenticate, authorize('ADMIN'), async (req, res) =>
             updateData.tanggalSelesai = new Date(tanggalSelesai);
         }
 
-        if (nilaiAkhir !== undefined) {
-            updateData.nilaiAkhir = nilaiAkhir ? parseFloat(nilaiAkhir) : null;
+        if (sistemKerja !== undefined) {
+            updateData.sistemKerja = sistemKerja;
         }
 
         if (catatan !== undefined) {

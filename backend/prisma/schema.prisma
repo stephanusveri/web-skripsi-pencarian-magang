@@ -103,9 +103,14 @@ model LowonganMagang {
 model Lamaran {
   id              String         @id @default(uuid())
   status          StatusLamaran  @default(PENDING)
-  suratLamaran    String
+
+  cvLink          String?
+  cvFileName      String?
+  portfolioLink   String?
+  linkedinLink    String?
+  resumeLink      String?
+
   tanggalLamar    DateTime       @default(now())
-  catatan         String?
 
   mahasiswaId     String
   mahasiswa       Mahasiswa      @relation(fields: [mahasiswaId], references: [id], onDelete: Cascade)
@@ -127,7 +132,7 @@ model HistoryMagang {
   websitePerusahaan String? 
   tanggalMulai      DateTime
   tanggalSelesai    DateTime
-  nilaiAkhir        Float?
+  sistemKerja       String?
   catatan           String?
   createdAt         DateTime  @default(now())
 
