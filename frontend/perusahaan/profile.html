@@ -4,21 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Perusahaan</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet"/>
     <link rel="stylesheet" href="../assets/css/sweetalert2.min.css">
     <script src="../assets/js/sweetalert2.all.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white shadow fixed top-0 left-0 w-full">
+    <!-- Navbar -->
+    <nav id="main-nav" class="bg-white shadow fixed top-0 left-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold">Portal Perusahaan</h1>
-            <div class="space-x-4">
+            <h1 class="text-xl font-bold truncate">Portal Admin</h1>
+            <div class="hidden md:flex items-center space-x-4 flex-wrap">
                 <a href="dashboard.html" class="text-blue-600 hover:underline">Dashboard</a>
-                <a href="lowongan.html" class="text-blue-600 hover:underline">Lowongan Saya</a>
+                <a href="lowongan.html" class="text-blue-600 hover:underline"> Lowongan Saya</a>
                 <a href="lamaran.html" class="text-blue-600 hover:underline">Lamaran Masuk</a>
                 <a href="profile.html" class="text-blue-600 hover:underline">Profile</a>
                 <button id="logout-btn" class="text-red-600 hover:underline">Logout</button>
             </div>
+            <!-- Hamburger Button -->
+            <button id="hamburger-btn" class="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg hover:bg-gray-100 focus:outline-none transition-colors" aria-label="Toggle menu">
+                <i id="menu-icon" class="ri-menu-line text-2xl text-gray-700"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden-menu md:hidden bg-white border-t border-gray-100 px-4 py-3 flex flex-col space-y-3 absolute w-full shadow-lg">
+            <a href="dashboard.html" class="text-blue-600 hover:underline text-sm py-1">Dashboard</a>
+            <a href="lowongan.html" class="text-blue-600 hover:underline text-sm py-1">Lowongan Saya</a>
+            <a href="lamaran.html" class="text-blue-600 hover:underline text-sm py-1">Lamaran Masuk</a>
+            <a href="profile.html" class="text-blue-600 hover:underline text-sm py-1">Profile</a>
+            <button id="logout-btn-mobile" class="text-red-600 hover:underline text-sm text-left py-1">Logout</button>
         </div>
     </nav>
 
@@ -99,6 +115,33 @@
 
     <script src="../js/common.js"></script>
     <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        let menuOpen = false;
+
+        hamburgerBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('hidden-menu');
+                mobileMenu.classList.add('show-menu');
+                menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+            } else {
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700'
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                menuOpen = false;
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+            }
+        });
+
         checkAuth('PERUSAHAAN');
         document.getElementById('logout-btn').addEventListener('click', logout);
 

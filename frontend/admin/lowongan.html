@@ -73,6 +73,33 @@
 
     <script src="../js/common.js"></script>
     <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        let menuOpen = false;
+
+        hamburgerBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('hidden-menu');
+                mobileMenu.classList.add('show-menu');
+                menuIcon.className = 'ri-close-line text-2xl text-gray-700';
+            } else {
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700'
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !hamburgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                menuOpen = false;
+                mobileMenu.classList.remove('show-menu');
+                mobileMenu.classList.add('hidden-menu');
+                menuIcon.className = 'ri-menu-line text-2xl text-gray-700';
+            }
+        });
+        
         const user = initCommon('ADMIN');
         let allLowongan = [];
 

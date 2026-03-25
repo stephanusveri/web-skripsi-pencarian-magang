@@ -284,6 +284,13 @@ function setupLogoutButton(buttonId = 'logout-btn') {
     }
 }
 
+function setupLogoutButton(buttonId = 'logout-btn-mobile') {
+    const logoutBtn = document.getElementById(buttonId);
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+}
+
 // ========================================
 // INIT
 // ========================================
@@ -297,10 +304,12 @@ function initCommon(requiredRole = null) {
     const user = checkAuth(requiredRole);
 
     // Setup logout
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', logout)
-    }
+    // const logoutBtn = document.getElementById('logout-btn');
+    // if (logoutBtn) {
+    //     logoutBtn.addEventListener('click', logout)
+    // }
+    document.getElementById('logout-btn')?.addEventListener('click', logout);
+    document.getElementById('logout-btn-mobile')?.addEventListener('click', logout);
 
     return user;
 }
